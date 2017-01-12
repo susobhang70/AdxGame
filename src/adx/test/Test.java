@@ -50,9 +50,16 @@ public class Test {
             new HashMap<Integer, Double>() {{put(2, 300.0);}
         });
 
+    BidBundle bidBundle2 = 
+        new BidBundle(0, 
+            new HashSet<BidEntry>() {{add(new BidEntry(2, new Query(MarketSegment.YOUNG), 312.2, 31220.0));}}, 
+            new HashMap<Integer, Double>() {{put(2, 400.0);}
+        });
+
     Table<Integer, String, BidBundle> bidBundles = HashBasedTable.create();
     bidBundles.put(0, "enrique0", bidBundle0);
     bidBundles.put(0, "enrique1", bidBundle1);
+    bidBundles.put(0, "enrique2", bidBundle2);
 
     System.out.println(bidBundles);
     
