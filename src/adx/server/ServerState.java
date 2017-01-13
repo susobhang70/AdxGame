@@ -8,6 +8,7 @@ import java.util.Set;
 
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
+import adx.structures.BidEntry;
 import adx.util.Logging;
 
 import com.google.common.collect.HashBasedTable;
@@ -21,7 +22,7 @@ import com.google.common.collect.Table;
 public class ServerState {
 
   /**
-   * A unique identifer of the game.
+   * A unique identifier of the game.
    */
   private final int gameId;
 
@@ -133,6 +134,26 @@ public class ServerState {
     this.campaignsOwnership.put(campaignId, agentName);
   }
 
+  /**
+   * Validates that the campaigns in a bid bundle actually belong to the given
+   * agent.
+   * 
+   * @param bidBundle
+   * @param agent
+   * @param campaignsOwnership
+   * @throws AdXException 
+   */
+  public boolean validateBidBundle(BidBundle bidBundle, String agent) throws AdXException {
+    for(BidEntry bidEntry : bidBundle.getBidEntries()) {
+      if(!this.campaignsOwnership.containsKey(bidEntry.getCampaignId())) {
+        throw new AdXException("The bid bundle refers to a non-existing campaign.");
+      } else if(!this.campaignsOwnership.get(bidEntry.getCampaignId()).equals(agent)) {
+        throw new AdXException("The bid bundle refers to a campaign not owned by the agent.");
+      }
+    }
+    return true;
+  }
+  
   /**
    * A light string representation for debugging purposes.
    */
