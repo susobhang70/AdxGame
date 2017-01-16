@@ -222,6 +222,7 @@ public class GameServer {
           this.serverState.advanceDay();
           this.sendEndOfDayMessage();
           // Run auction for the bids received the day before.
+          this.serverState.printServerState();
           
         }
       }

@@ -43,8 +43,7 @@ public class BidBundle {
    * @param bidEntries
    * @param campaignLimits
    */
-  public BidBundle(int day, Set<BidEntry> bidEntries,
-      Map<Integer, Double> campaignLimits) {
+  public BidBundle(int day, Set<BidEntry> bidEntries, Map<Integer, Double> campaignLimits) {
     super();
     this.day = day;
     this.bidEntries = bidEntries;
@@ -81,7 +80,6 @@ public class BidBundle {
 
   @Override
   public String toString() {
-    return "[Day " + this.day + ", entries = " + this.bidEntries
-        + ", limits = " + this.campaignsLimits + "]";
+    return "[Day " + this.day + ", entries = " + this.bidEntries + ", limits = " + this.campaignsLimits + "]";
   }
 }
