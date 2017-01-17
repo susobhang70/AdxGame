@@ -3,6 +3,7 @@ package adx.auctions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,10 @@ import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Query;
+import adx.util.Logging;
 import adx.util.Pair;
+import adx.util.Parameters;
+import adx.util.Sampling;
 
 /**
  * Methods to run second price auctions on bid bundles.
@@ -49,7 +53,7 @@ public class AdAuctions {
   }
 
   /**
-   * A helper function to check that the input of an auction is valid. 
+   * A helper function to check that the input of an auction is valid.
    * 
    * @param day
    * @param supply
@@ -59,7 +63,8 @@ public class AdAuctions {
    * @param adStatistics
    * @throws AdXException
    */
-  private static void checkAuctionInput(int day, int supply, Query query, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, AdStatistics adStatistics) throws AdXException {
+  private static void checkAuctionInput(int day, int supply, Query query, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits,
+      AdStatistics adStatistics) throws AdXException {
     if (day < 0) {
       throw new AdXException("Cannot run auction in a negative day");
     }
@@ -88,15 +93,15 @@ public class AdAuctions {
    * @param limits
    * @throws AdXException
    */
-  public static void runSecondPriceAuction(int day, Query query, int supply, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, AdStatistics adStatistics) throws AdXException {
+  public static void runSecondPriceAuction(int day, Query query, int supply, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits,
+      AdStatistics adStatistics) throws AdXException {
     AdAuctions.checkAuctionInput(day, supply, query, bids, limits, adStatistics);
     Collections.sort(bids, AdAuctions.bidComparator);
-    /* Some debug prints
-    Logging.log("Running second price auctions on supply = " + supply);
-    for (Pair<String, BidEntry> x : bids)
-      Logging.log(x.getElement1() + ": " + x.getElement2());
-    for (Entry<Integer, Double> x : limits.entrySet())
-      Logging.log("[Campaign " + x.getKey() + ", daily limit = " + x.getValue() + "]");*/
+    /*
+     * Some debug prints Logging.log("Running second price auctions on supply = " + supply); for (Pair<String, BidEntry> x : bids) Logging.log(x.getElement1() +
+     * ": " + x.getElement2()); for (Entry<Integer, Double> x : limits.entrySet()) Logging.log("[Campaign " + x.getKey() + ", daily limit = " + x.getValue() +
+     * "]");
+     */
 
     // Keep the auction running while there is supply and at least one bidder.
     while (supply > 0 && bids.size() > 0) {
@@ -105,8 +110,8 @@ public class AdAuctions {
       Double winnerCost = winner.getElement1();
       String winnerName = winner.getElement2().getElement1();
       BidEntry winnerBidEntry = winner.getElement2().getElement2();
-      
-      if(!winnerBidEntry.getQuery().matchesQuery(query)) 
+
+      if (!winnerBidEntry.getQuery().matchesQuery(query))
         throw new AdXException("Error while running auction: given bid's query does not match the query being auctioned.");
 
       // Remove winner from further consideration.
@@ -132,7 +137,7 @@ public class AdAuctions {
       supply -= winCount;
     }
     // Print for debugging purposes
-    //Logging.log(adStatistics);
+    // Logging.log(adStatistics);
   }
 
   /**
@@ -167,6 +172,49 @@ public class AdAuctions {
     } else {
       return new Pair<Double, Pair<String, BidEntry>>(winners.get(0).getElement2().getBid(), winners.get(randomGenerator.nextInt(winners.size())));
     }
+  }
+
+  /**
+   * A wrapper function that runs auction on all queries.
+   * 
+   * @param day
+   * @param bidBundles
+   * @param adStatistics
+   * @throws AdXException
+   */
+  public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, AdStatistics adStatistics) throws AdXException {
+    HashMap<Query, Integer> samplePopulation = Sampling.samplePopulation(Parameters.POPULATION_SIZE);
+    Logging.log(samplePopulation);
+    for (Entry<Query, Integer> sample : samplePopulation.entrySet()) {
+      Query query = sample.getKey();
+      int supply = sample.getValue();
+      List<Pair<String, BidEntry>> bids = AdAuctions.filterBids(query, bidBundles);
+      Map<Integer, Double> limits = AdAuctions.getCampaingsDailyLimit(day, bidBundles);
+      AdAuctions.runSecondPriceAuction(day, query, supply, bids, limits, adStatistics);
+    }
+  }
+
+  /**
+   * Given a map Agent -> BidBundle, returns a map Campaign Id -> Limit
+   * 
+   * @param day
+   * @param bidBundles
+   * @return the map containing the daily limit of all campaigns.
+   * @throws AdXException
+   */
+  public static Map<Integer, Double> getCampaingsDailyLimit(int day, Map<String, BidBundle> bidBundles) throws AdXException {
+    Map<Integer, Double> limits = new HashMap<Integer, Double>();
+    for (BidBundle bidBundle : bidBundles.values()) {
+      if (bidBundle.getDay() != day) {
+        throw new AdXException("Processing a bid bundle for the WRONG day");
+      }
+      for (BidEntry bidEntry : bidBundle.getBidEntries()) {
+        if (bidBundle.getCampaignLimit(bidEntry.getCampaignId()) != null) {
+          limits.put(bidEntry.getCampaignId(), bidBundle.getCampaignLimit(bidEntry.getCampaignId()));
+        }
+      }
+    }
+    return limits;
   }
 
   /**

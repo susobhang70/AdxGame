@@ -4,8 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is the main structure by which bids on queries are communicated to the
- * server.
+ * This is the main structure by which bids on queries are communicated to the server.
  * 
  * @author Enrique Areyan Viqueira
  */
@@ -74,8 +73,12 @@ public class BidBundle {
    * @param campaignId
    * @return the limit expenditure for the day for the given campaign.
    */
-  public double getCampaignLimit(int campaignId) {
-    return this.campaignsLimits.get(campaignId);
+  public Double getCampaignLimit(int campaignId) {
+    if (!(this.campaignsLimits == null)) {
+      return this.campaignsLimits.get(campaignId);
+    } else {
+      return null;
+    }
   }
 
   @Override

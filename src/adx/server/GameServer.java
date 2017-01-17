@@ -16,6 +16,7 @@ import adx.messages.InitialMessage;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
 import adx.util.Logging;
+import adx.util.Parameters;
 import adx.util.Sampling;
 import adx.util.Startup;
 
@@ -31,8 +32,6 @@ import com.esotericsoftware.kryonet.Server;
  */
 public class GameServer {
 
-  private static final int DURATION_DAY = 10;
-  
   /**
    * Server Kryo object.
    */
@@ -188,7 +187,7 @@ public class GameServer {
    */
   private synchronized void sendEndOfDayMessage() {
     Logging.log("[-] Sending end of day message: ");
-    Instant timeEndOfDay = Instant.now().plusSeconds(DURATION_DAY);
+    Instant timeEndOfDay = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
     Logging.log("\t[-] Time Elapsed " + Duration.between(Instant.now(), timeEndOfDay).getSeconds() + " s, " + " of game time, we are on day " + this.serverState.getCurrentDay());
     this.serverState.currentDayEnd = timeEndOfDay;
     EndOfDayMessage endOfDayMessage = new EndOfDayMessage(this.serverState.getCurrentDay(), timeEndOfDay.toString());
@@ -202,14 +201,15 @@ public class GameServer {
    */
   private void runAdXGame() {
     // First order of business is to accept connections for a fixed amount of time
-    Instant deadlineForNewPlayers = Instant.now().plusSeconds(DURATION_DAY);
+    Instant deadlineForNewPlayers = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
     Logging.log("[-] Accepting connections until " + deadlineForNewPlayers);
-    while (Instant.now().isBefore(deadlineForNewPlayers));
+    while (Instant.now().isBefore(deadlineForNewPlayers))
+      ;
     // Do not accept any new agents beyond deadline. Play with present agents.
     this.acceptingNewPlayers = false;
     // Check if there is at least one agent to play the game.
     if (this.namesToConnections.size() > 0) {
-      Instant endTime = Instant.now().plusSeconds(DURATION_DAY);
+      Instant endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
       this.sendInitialMessage();
       this.sendEndOfDayMessage();
       // Play game
@@ -218,12 +218,12 @@ public class GameServer {
           // Time is up for the present day, stop accepting bids for this day
           // and run corresponding auctions.
           this.serverState.printServerState();
-          endTime = Instant.now().plusSeconds(DURATION_DAY);
+          endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
           this.serverState.advanceDay();
           this.sendEndOfDayMessage();
           // Run auction for the bids received the day before.
           this.serverState.printServerState();
-          
+
         }
       }
     } else {

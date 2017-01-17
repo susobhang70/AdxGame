@@ -13,6 +13,7 @@ import java.util.Random;
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
 import adx.structures.MarketSegment;
+import adx.structures.Query;
 
 /**
  * This class implements logic to sample a population of users given their
@@ -80,11 +81,11 @@ public class Sampling {
    */
   // TODO: this method could be optimized. Since the cumulative distribution
   // is fixed, create an array (or map) of size 10000 that maps directly to the market segment.
-  public static final HashMap<MarketSegment, Integer> samplePopulation(int n) {
+  public static final HashMap<Query, Integer> samplePopulation(int n) {
     // Construct the sample. Initially there are zero users in each market segment.
-    HashMap<MarketSegment, Integer> population = new HashMap<MarketSegment, Integer>();
+    HashMap<Query, Integer> population = new HashMap<Query, Integer>();
     for (MarketSegment m : Sampling.segmentsToSample.keySet()) {
-      population.put(m, 0);
+      population.put(new Query(m), 0);
     }
     Random random = new Random();
     // Sample one user at a time.
@@ -92,7 +93,8 @@ public class Sampling {
       int r = random.nextInt(Sampling.totalProportion) + 1;
       for (Entry<MarketSegment, Integer> x : Sampling.cumulativeMarketSegments) {
         if (r <= x.getValue()) {
-          population.put(x.getKey(), population.get(x.getKey()) + 1);
+          Query query = new Query(x.getKey());
+          population.put(query, population.get(query) + 1);
           break;
         }
       }

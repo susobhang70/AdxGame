@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ MarketSegmentTest.class, QueryTest.class, AdAuctionsTest.class, ServerStateTest.class, AdStatisticsTest.class })
+@SuiteClasses({ MarketSegmentTest.class, QueryTest.class, AdAuctionsTest.class, ServerStateTest.class, AdStatisticsTest.class, SamplingTest.class, BidBundleTest.class })
 public class AllTests {
 
 }
