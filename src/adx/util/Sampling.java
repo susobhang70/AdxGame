@@ -105,7 +105,7 @@ public class Sampling {
   /**
    * Samples a campaign to be sent to agents at the start of the game.
    * 
-   * @return an initial day campaign.
+   * @return an initial day campaign where reach equals budget.
    * @throws AdXException
    */
   public static Campaign sampleInitialCampaign() throws AdXException {
@@ -119,11 +119,26 @@ public class Sampling {
    * Samples a campaign among all possible market segments (1, 2 or 3 letter segments)
    * 
    * @param day
-   * @return
+   * @return a campaign with a random reach and market segment.
    * @throws AdXException
    */
   public static Campaign sampleCampaign() throws AdXException {
     return Sampling.sampleCampaignOpportunityMessage(MarketSegment.proportionsList);
+  }
+  
+  /**
+   * Samples a list of n campaign. 
+   * 
+   * @param n
+   * @return a list of n random campaigns.
+   * @throws AdXException
+   */
+  public static List<Campaign> sampleCampaingList(int n) throws AdXException {
+    ArrayList<Campaign> campaignsList = new ArrayList<Campaign>();
+    for(int i = 0 ; i < n; i++) {
+      campaignsList.add(Sampling.sampleCampaign());
+    }
+    return campaignsList;
   }
   
   /**

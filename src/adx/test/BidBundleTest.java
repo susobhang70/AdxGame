@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.MarketSegment;
@@ -18,7 +19,7 @@ import adx.structures.Query;
 public class BidBundleTest {
 
   @SuppressWarnings("serial")
-  public static BidBundle getBidBundle0() {
+  public static BidBundle getBidBundle0() throws AdXException {
     return new BidBundle(0, new HashSet<BidEntry>() {
       {
         add(new BidEntry(1, new Query(MarketSegment.FEMALE), 12.0, 120.0));
@@ -28,12 +29,17 @@ public class BidBundleTest {
       {
         put(1, 200.0);
       }
+    }, new HashMap<Integer, Double>() {
+      {
+        put(1, 13.3);
+        put(2, 38.7);
+      }
     });
 
   }
 
   @SuppressWarnings("serial")
-  public static BidBundle getBidBundle1() {
+  public static BidBundle getBidBundle1() throws AdXException {
     return new BidBundle(0, new HashSet<BidEntry>() {
       {
         add(new BidEntry(2, new Query(MarketSegment.FEMALE_HIGH_INCOME), 600, 1220.0));
@@ -42,11 +48,16 @@ public class BidBundleTest {
       {
         put(2, 300.0);
       }
+    }, new HashMap<Integer, Double>() {
+      {
+        put(1, 7.67);
+        put(2, 23.5);
+      }
     });
   }
 
   @SuppressWarnings("serial")
-  public static BidBundle getBidBundle2() {
+  public static BidBundle getBidBundle2() throws AdXException {
     return new BidBundle(0, new HashSet<BidEntry>() {
       {
         add(new BidEntry(3, new Query(MarketSegment.YOUNG), 600, 31220.0));
@@ -55,21 +66,21 @@ public class BidBundleTest {
       {
         put(3, 400.0);
       }
-    });
+    }, null);
   }
 
   @SuppressWarnings("serial")
-  public static BidBundle getBidBundle3() {
+  public static BidBundle getBidBundle3() throws AdXException {
     return new BidBundle(0, new HashSet<BidEntry>() {
       {
         add(new BidEntry(4, new Query(MarketSegment.YOUNG), 600, 31220.0));
         add(new BidEntry(4, new Query(MarketSegment.MALE_YOUNG), 312.2, 31220.0));
         add(new BidEntry(4, new Query(MarketSegment.FEMALE_LOW_INCOME), 312.2, 31220.0));
       }
-    }, null);
+    }, null, null);
   }
 
-  public static Table<Integer, String, BidBundle> getTableBidBundles() {
+  public static Table<Integer, String, BidBundle> getTableBidBundles() throws AdXException {
     Table<Integer, String, BidBundle> bidBundles = HashBasedTable.create();
     bidBundles.put(0, "agent0", BidBundleTest.getBidBundle0());
     bidBundles.put(0, "agent1", BidBundleTest.getBidBundle1());
@@ -79,7 +90,7 @@ public class BidBundleTest {
   }
 
   @Test
-  public void testBidBundles() {
+  public void testBidBundles() throws AdXException {
     BidBundle bidBundle0 = BidBundleTest.getBidBundle0();
     assertEquals(bidBundle0.getBidEntries().size(), 2);
     assertEquals(bidBundle0.getCampaignLimit(1), new Double(200.0));

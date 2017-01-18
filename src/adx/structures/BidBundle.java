@@ -3,6 +3,8 @@ package adx.structures;
 import java.util.Map;
 import java.util.Set;
 
+import adx.exceptions.AdXException;
+
 /**
  * This is the main structure by which bids on queries are communicated to the server.
  * 
@@ -26,6 +28,11 @@ public class BidBundle {
   private final Map<Integer, Double> campaignsLimits;
 
   /**
+   * This map stores bids of campaign as (CampaignId, Bid).
+   */
+  private final Map<Integer, Double> campaignsBid;
+
+  /**
    * Constructor.
    */
   public BidBundle() {
@@ -33,6 +40,7 @@ public class BidBundle {
     this.day = -1;
     this.bidEntries = null;
     this.campaignsLimits = null;
+    this.campaignsBid = null;
   }
 
   /**
@@ -41,12 +49,20 @@ public class BidBundle {
    * @param day
    * @param bidEntries
    * @param campaignLimits
+   * @throws AdXException
    */
-  public BidBundle(int day, Set<BidEntry> bidEntries, Map<Integer, Double> campaignLimits) {
+  public BidBundle(int day, Set<BidEntry> bidEntries, Map<Integer, Double> campaignsLimits, Map<Integer, Double> campaignsBid) throws AdXException {
     super();
+    if (day < 0) {
+      throw new AdXException("The day must be a non-negative integer.");
+    }
     this.day = day;
+    if (bidEntries == null) {
+      throw new AdXException("The bidEntries must be non-null");
+    }
     this.bidEntries = bidEntries;
-    this.campaignsLimits = campaignLimits;
+    this.campaignsLimits = campaignsLimits;
+    this.campaignsBid = campaignsBid;
   }
 
   /**
@@ -81,8 +97,28 @@ public class BidBundle {
     }
   }
 
+  /**
+   * Returns the bid for the given campaign id.
+   * 
+   * @param campaignId
+   * @return the bid for the campaign
+   */
+  public Double getCampaignBid(int campaignId) {
+    if (this.campaignsBid == null) {
+      return null;
+    }
+    return this.campaignsBid.get(campaignId);
+  }
+
   @Override
   public String toString() {
-    return "[Day " + this.day + ", entries = " + this.bidEntries + ", limits = " + this.campaignsLimits + "]";
+    String ret = "[Day " + this.day;
+    if (this.bidEntries != null)
+      ret += ", entries = " + this.bidEntries;
+    if (this.campaignsLimits != null)
+      ret += ", campaigns limits = " + this.campaignsLimits;
+    if (this.campaignsBid != null)
+      ret += ", campaigns bid = " + this.campaignsBid;
+    return ret + "]";
   }
 }

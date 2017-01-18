@@ -1,5 +1,6 @@
 package adx.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -34,5 +35,7 @@ public class Startup {
     kryo.register(HashSet.class);
     kryo.register(HashMap.class);
     kryo.register(ACKMessage.class);
+    kryo.register(Pair.class);
+    kryo.register(ArrayList.class);
   }
 }

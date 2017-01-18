@@ -14,7 +14,7 @@ import adx.structures.MarketSegment;
 import adx.structures.Query;
 
 public class AdStatisticsTest {
-  
+
   public static AdStatistics getAdStatistics() {
     HashSet<String> agents = new HashSet<String>();
     agents.add("agent0");
@@ -56,7 +56,16 @@ public class AdStatisticsTest {
     } catch (Exception e) {
       fail("Got wrong kind of exception");
     }
-    assertEquals(adStatistics.getStatistic(0, "agent0", 999, null), null);
+
+    try {
+      adStatistics.getStatistic(0, "agent0", 0, null);
+      fail("Suppose to get AdXException");
+    } catch (AdXException e) {
+      assertTrue(true);
+    } catch (Exception e) {
+      fail("Got wrong kind of exception");
+    }
+
     assertEquals(adStatistics.getStatistic(0, "agent0", 1, new Query(MarketSegment.FEMALE_YOUNG_LOW_INCOME)).getElement1(), new Integer(10));
     assertEquals(adStatistics.getStatistic(0, "agent0", 1, new Query(MarketSegment.FEMALE_YOUNG_LOW_INCOME)).getElement2(), new Double(100.0));
     adStatistics.addStatistic(0, "agent0", 1, new Query(MarketSegment.FEMALE_OLD_LOW_INCOME), 20, 200.0);

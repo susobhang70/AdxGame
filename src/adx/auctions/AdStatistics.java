@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import adx.exceptions.AdXException;
 import adx.structures.Query;
 import adx.util.Pair;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 /**
  * Maintains statistics of ad auction.
@@ -61,6 +61,22 @@ public class AdStatistics {
   }
 
   /**
+   * Check if the given input (day, agent, query) is valid.
+   * 
+   * @param day
+   * @param agent
+   * @param query
+   * @throws AdXException
+   */
+  private void checkValidInput(int day, String agent, Query query) throws AdXException {
+    if (query == null) {
+      throw new AdXException("There are no statistics for null query.");
+    } else {
+      this.checkValidInput(day, agent);
+    }
+  }
+
+  /**
    * Adds an statistic.
    * 
    * @param day
@@ -72,7 +88,7 @@ public class AdStatistics {
    * @throws AdXException
    */
   public void addStatistic(int day, String agent, int campaignId, Query query, int winCount, double winCost) throws AdXException {
-    this.checkValidInput(day, agent);
+    this.checkValidInput(day, agent, query);
     if (!this.statistics.contains(day, agent)) {
       this.statistics.put(day, agent, HashBasedTable.create());
       this.summary.put(day, agent, new HashMap<Integer, Pair<Integer, Double>>());
@@ -103,7 +119,7 @@ public class AdStatistics {
    * @throws AdXException
    */
   public Pair<Integer, Double> getStatistic(int day, String agent, int campaignId, Query query) throws AdXException {
-    this.checkValidInput(day, agent);
+    this.checkValidInput(day, agent, query);
     if (this.statistics.get(day, agent) == null || this.statistics.get(day, agent).get(campaignId, query) == null) {
       this.addStatistic(day, agent, campaignId, query, 0, 0.0);
     }
@@ -132,20 +148,36 @@ public class AdStatistics {
     return dayAgentSummaryStatistics.get(campaignId);
   }
 
+  /**
+   * Returns the summary statistics for the given day and agent.
+   * 
+   * @param day
+   * @param agent
+   * @return
+   */
+  public Map<Integer, Pair<Integer, Double>> getDailySummary(int day, String agent) {
+    return this.summary.get(day, agent);
+  }
+
   @Override
   public String toString() {
-    String ret = "\n Statistics Table:";
-    for (Entry<Integer, Map<String, Table<Integer, Query, Pair<Integer, Double>>>> x : this.statistics.rowMap().entrySet()) {
-      ret += "\n\t Day: " + x.getKey();
-      for (Entry<String, Table<Integer, Query, Pair<Integer, Double>>> y : x.getValue().entrySet()) {
-        ret += "\n\t\t Agent: " + y.getKey();
-        for (Entry<Integer, Map<Query, Pair<Integer, Double>>> z : y.getValue().rowMap().entrySet()) {
-          ret += "\n\t\t\t Campaign: " + z.getKey() + ", total " + this.summary.get(x.getKey(), y.getKey()).get(z.getKey());
-          for (Entry<Query, Pair<Integer, Double>> w : z.getValue().entrySet()) {
-            ret += "\n\t\t\t\t Query: " + w.getKey() + ", (" + w.getValue().getElement1() + ", " + w.getValue().getElement2() + ")";
+    String ret = "";
+    if (this.statistics.rowMap().entrySet().size() > 0) {
+      ret += "\n\t\t Statistics Table:";
+      for (Entry<Integer, Map<String, Table<Integer, Query, Pair<Integer, Double>>>> x : this.statistics.rowMap().entrySet()) {
+        ret += "\n\t\t\t Day: " + x.getKey();
+        for (Entry<String, Table<Integer, Query, Pair<Integer, Double>>> y : x.getValue().entrySet()) {
+          ret += "\n\t\t\t\t Agent: " + y.getKey();
+          for (Entry<Integer, Map<Query, Pair<Integer, Double>>> z : y.getValue().rowMap().entrySet()) {
+            ret += "\n\t\t\t\t\t Campaign: " + z.getKey() + ", total " + this.summary.get(x.getKey(), y.getKey()).get(z.getKey());
+            for (Entry<Query, Pair<Integer, Double>> w : z.getValue().entrySet()) {
+              ret += "\n\t\t\t\t\t\t Query: " + w.getKey() + ", (" + w.getValue().getElement1() + ", " + w.getValue().getElement2() + ")";
+            }
           }
         }
       }
+    } else {
+      ret += "Currently, there are no statistics";
     }
     return ret;
   }

@@ -19,6 +19,14 @@ public class Pair<T1, T2> {
    * Second element.
    */
   private final T2 element2;
+  
+  /**
+   * Empty constructor. 
+   */
+  public Pair() {
+    this.element1 = null;
+    this.element2 = null;
+  }
 
   /**
    * Constructor.

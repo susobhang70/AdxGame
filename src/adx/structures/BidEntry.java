@@ -1,5 +1,7 @@
 package adx.structures;
 
+import adx.exceptions.AdXException;
+
 /**
  * A bid entry is a constituent part of a BidBundle.
  * 
@@ -45,12 +47,25 @@ public class BidEntry {
    * @param query
    * @param bid
    * @param limit
+   * @throws AdXException
    */
-  public BidEntry(int campaignId, Query query, double bid, double limit) {
+  public BidEntry(int campaignId, Query query, double bid, double limit) throws AdXException {
     super();
+    if (campaignId < 0) {
+      throw new AdXException("The campaignId must be a non-negative integer.");
+    }
     this.campaignId = campaignId;
+    if (query == null) {
+      throw new AdXException("The query must be non-null.");
+    }
     this.query = query;
+    if (bid < 0) {
+      throw new AdXException("The bid must be a non-negative double.");
+    }
     this.bid = bid;
+    if (limit <= 0) {
+      throw new AdXException("The limit must be a positive double greater than zero.");
+    }
     this.limit = limit;
   }
 

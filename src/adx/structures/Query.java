@@ -5,8 +5,7 @@ import java.util.Objects;
 import adx.exceptions.AdXException;
 
 /**
- * A query represents a market segment together with all possible attributes
- * such as: publisher device and adtype.
+ * A query represents a market segment together with all possible attributes such as: publisher device and adtype.
  * 
  * @author Enrique Areyan Viqueira
  */
@@ -42,7 +41,10 @@ public class Query {
 
   @Override
   public String toString() {
-    return this.marketSegment.name();
+    if (this.marketSegment != null)
+      return this.marketSegment.name();
+    else
+      return null;
   }
 
   @Override
@@ -63,8 +65,7 @@ public class Query {
   }
 
   /**
-   * This function determines whether this query matches a given query for
-   * auction selection purposes.
+   * This function determines whether this query matches a given query for auction selection purposes.
    * 
    * @param q
    * @return
