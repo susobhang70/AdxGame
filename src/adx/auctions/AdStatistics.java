@@ -2,15 +2,15 @@ package adx.auctions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import adx.exceptions.AdXException;
 import adx.structures.Query;
 import adx.util.Pair;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 
 /**
  * Maintains statistics of ad auction.
@@ -79,17 +79,17 @@ public class AdStatistics {
     }
     if (!this.statistics.get(day, agent).contains(campaignId, query)) {
       this.statistics.get(day, agent).put(campaignId, query, new Pair<Integer, Double>(winCount, winCost));
-      if (this.summary.get(day, agent).get(campaignId) == null) {
-        this.summary.get(day, agent).put(campaignId, new Pair<Integer, Double>(winCount, winCost));
-      } else {
-        Pair<Integer, Double> total = this.summary.get(day, agent).get(campaignId);
-        this.summary.get(day, agent).put(campaignId, new Pair<Integer, Double>(total.getElement1() + winCount, total.getElement2() + winCost));
-      }
-    } 
-    //else {
-    //  throw new AdXException("The statistics for: (day = " + day + ", agent = " + agent + ", campaign = " + campaignId + ", query = " + query
-    //      + "); have already been recorded.");
-    //}
+    } else {
+      Integer currentCount = this.statistics.get(day, agent).get(campaignId, query).getElement1();
+      Double currentCost = this.statistics.get(day, agent).get(campaignId, query).getElement2();
+      this.statistics.get(day, agent).put(campaignId, query, new Pair<Integer, Double>(currentCount + winCount, currentCost + winCost));
+    }
+    if (this.summary.get(day, agent).get(campaignId) == null) {
+      this.summary.get(day, agent).put(campaignId, new Pair<Integer, Double>(winCount, winCost));
+    } else {
+      Pair<Integer, Double> total = this.summary.get(day, agent).get(campaignId);
+      this.summary.get(day, agent).put(campaignId, new Pair<Integer, Double>(total.getElement1() + winCount, total.getElement2() + winCost));
+    }
   }
 
   /**
@@ -104,11 +104,10 @@ public class AdStatistics {
    */
   public Pair<Integer, Double> getStatistic(int day, String agent, int campaignId, Query query) throws AdXException {
     this.checkValidInput(day, agent);
-    Table<Integer, Query, Pair<Integer, Double>> dayAgentStatistics = this.statistics.get(day, agent);
-    if (dayAgentStatistics == null) {
-      throw new AdXException("Could not find statistics for day: " + day + " and agent: " + agent);
+    if (this.statistics.get(day, agent) == null || this.statistics.get(day, agent).get(campaignId, query) == null) {
+      this.addStatistic(day, agent, campaignId, query, 0, 0.0);
     }
-    return dayAgentStatistics.get(campaignId, query);
+    return this.statistics.get(day, agent).get(campaignId, query);
   }
 
   /**
