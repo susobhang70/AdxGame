@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.junit.Test;
 import adx.auctions.CampaignAuctions;
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
+import adx.structures.Campaign;
+import adx.structures.MarketSegment;
 import adx.util.Pair;
 
 public class CampaignAuctionsTest {
@@ -94,18 +97,43 @@ public class CampaignAuctionsTest {
     assertEquals(winnerPair.getElement2(), new Double(200.0));
   }
   
-  @Test
+  @Test(expected = AdXException.class)
   public void testFilterBids0() throws AdXException {
     Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(99999, bidBundles);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, MarketSegment.FEMALE, 999), bidBundles, null);
     assertEquals(filteredBids.size(), 0);
   }
 
   @Test
   public void testFilterBids1() throws AdXException {
     Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(1, bidBundles);
-    assertEquals(filteredBids.size(), 2);
+    Map<String, Double> qualityScores = new HashMap<String, Double>();
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
+    assertEquals(filteredBids.size(), 0);
+  }
+  
+  @Test
+  public void testFilterBids2() throws AdXException {
+    Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
+    Map<String, Double> qualityScores = new HashMap<String, Double>();
+    qualityScores.put("agent0", 1.0);
+    qualityScores.put("agent1", 1.0);
+    qualityScores.put("agent2", 1.0);
+    qualityScores.put("agent3", 1.0);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
+    assertEquals(filteredBids.size(), 1);
+  }
+
+  @Test
+  public void testFilterBids3() throws AdXException {
+    Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
+    Map<String, Double> qualityScores = new HashMap<String, Double>();
+    qualityScores.put("agent0", 0.25);
+    qualityScores.put("agent1", 1.0);
+    qualityScores.put("agent2", 1.0);
+    qualityScores.put("agent3", 1.0);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, MarketSegment.FEMALE, 1500), bidBundles, qualityScores);
+    assertEquals(filteredBids.size(), 0);
   }
 
 }

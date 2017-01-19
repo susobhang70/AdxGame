@@ -7,7 +7,6 @@ import java.util.HashSet;
 import adx.messages.ACKMessage;
 import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
-import adx.messages.InitialMessage;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;
@@ -25,7 +24,6 @@ import com.esotericsoftware.kryo.Kryo;
 public class Startup {
   public static void start(Kryo kryo) {
     kryo.register(ConnectServerMessage.class);
-    kryo.register(InitialMessage.class);
     kryo.register(Campaign.class);
     kryo.register(MarketSegment.class);
     kryo.register(EndOfDayMessage.class);

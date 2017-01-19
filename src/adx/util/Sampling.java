@@ -78,10 +78,11 @@ public class Sampling {
    * according to the parameters of the game.
    * 
    * @param n
+   * @throws AdXException 
    */
   // TODO: this method could be optimized. Since the cumulative distribution
   // is fixed, create an array (or map) of size 10000 that maps directly to the market segment.
-  public static final HashMap<Query, Integer> samplePopulation(int n) {
+  public static final HashMap<Query, Integer> samplePopulation(int n) throws AdXException {
     // Construct the sample. Initially there are zero users in each market segment.
     HashMap<Query, Integer> population = new HashMap<Query, Integer>();
     for (MarketSegment m : Sampling.segmentsToSample.keySet()) {

@@ -5,7 +5,6 @@ import java.io.IOException;
 import adx.messages.ACKMessage;
 import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
-import adx.messages.InitialMessage;
 import adx.util.Logging;
 import adx.util.Startup;
 
@@ -54,8 +53,6 @@ public abstract class Agent {
           try {
             if (message instanceof ConnectServerMessage) {
               handleConnectServerMessage((ConnectServerMessage) message);
-            } else if (message instanceof InitialMessage) {
-              handleInitialMessage((InitialMessage) message);
             } else if (message instanceof EndOfDayMessage) {
               handleEndOfDayMessage((EndOfDayMessage) message);
             } else if (message instanceof ACKMessage) {
@@ -115,13 +112,6 @@ public abstract class Agent {
       Logging.log("[x] ACK Message, error, " + message.getMessage());
     }
   }
-
-  /**
-   * This method handles the initial message.
-   *  
-   * @param initialMessage
-   */
-  abstract protected void handleInitialMessage(InitialMessage initialMessage);
 
   /**
    * Handles for the end of day message.

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import adx.exceptions.AdXException;
 import adx.messages.ACKMessage;
 import adx.messages.ConnectServerMessage;
 import adx.structures.BidBundle;
@@ -128,7 +129,7 @@ abstract public class GameServerAbstract {
       Logging.log("\t\t[-] Agent credentials are valid, agent registered");
       this.namesToConnections.put(agentName, agentConnection);
       this.connectionsToNames.put(agentConnection, agentName);
-      this.serverState.saveAgentName(agentName);
+      this.serverState.registerAgent(agentName);
       serverResponse = "OK";
       statusCode = 1;
     } else {
@@ -159,7 +160,8 @@ abstract public class GameServerAbstract {
   
   /**
    * Runs the game. Must be implemented by the extending class.
+   * @throws AdXException 
    */
-  abstract protected void runAdXGame();
+  abstract protected void runAdXGame() throws AdXException;
   
 }

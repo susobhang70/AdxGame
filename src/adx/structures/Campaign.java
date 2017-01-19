@@ -1,6 +1,7 @@
 package adx.structures;
 
 import adx.exceptions.AdXException;
+import adx.util.InputValidators;
 
 /**
  * Represents a campaign of the game.
@@ -48,15 +49,9 @@ public class Campaign {
    * @throws AdXException in case either budget or reach are non-positive.
    */
   public Campaign(int id, MarketSegment marketSegment, int reach) throws AdXException {
-    if (id <= 0) {
-      throw new AdXException("The id of a campaign must be a positive integer");
-    }
-    if (marketSegment == null) {
-      throw new AdXException("The market segment of a campaign cannot be null");
-    }
-    if (reach <= 0) {
-      throw new AdXException("The reach of a campaign must be a positive integer");
-    }
+    InputValidators.validateCampaignId(id);
+    InputValidators.validateNotNull(marketSegment);
+    InputValidators.validateCampaignReach(reach);
     this.id = id;
     this.marketSegment = marketSegment;
     this.reach = reach;
@@ -66,20 +61,18 @@ public class Campaign {
    * Sets budget. This method can only be called once.
    * 
    * @param budget
-   * @throws AdXException in case the method is called more than once.
+   * @throws AdXException
+   *           in case the method is called more than once.
    */
   public void setBudget(double budget) throws AdXException {
     if (this.budget == -1.0) {
-      if (budget <= 0.0) {
-        throw new AdXException("The budget of a campaign must be a positive double");
-      } else {
-        this.budget = budget;
-      }
+      InputValidators.validateCampaignBudget(budget);
+      this.budget = budget;
     } else {
       throw new AdXException("A campaign budget can only be set once");
     }
   }
-  
+
   /**
    * Getter.
    * 
@@ -88,7 +81,7 @@ public class Campaign {
   public int getId() {
     return this.id;
   }
-  
+
   /**
    * Getter.
    * 
@@ -97,6 +90,7 @@ public class Campaign {
   public MarketSegment getMarketSegment() {
     return this.marketSegment;
   }
+
   /**
    * Getter.
    * 
@@ -114,10 +108,10 @@ public class Campaign {
   public double getBudget() {
     return this.budget;
   }
+
   @Override
   public String toString() {
-    return "Campaign " + this.id + " = [Segment = " + this.marketSegment
-        + ", Reach = " + this.reach + ", Budget = " + this.budget + "]";
+    return "Campaign " + this.id + " = [Segment = " + this.marketSegment + ", Reach = " + this.reach + ", Budget = " + this.budget + "]";
   }
 
 }

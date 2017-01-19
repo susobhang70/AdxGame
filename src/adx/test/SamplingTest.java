@@ -15,7 +15,7 @@ import adx.util.Sampling;
 public class SamplingTest {
 
   @Test
-  public void testSamplePopulation() {
+  public void testSamplePopulation() throws AdXException {
     for (int i = 10; i < 1000; i++) {
       HashMap<Query, Integer> population = Sampling.samplePopulation(i);
       int total = 0;

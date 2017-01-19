@@ -13,6 +13,7 @@ import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Query;
+import adx.util.InputValidators;
 import adx.util.Pair;
 import adx.util.Parameters;
 import adx.util.Sampling;
@@ -49,39 +50,6 @@ public class AdAuctions {
   }
 
   /**
-   * A helper function to check that the input of an auction is valid.
-   * 
-   * @param day
-   * @param supply
-   * @param query
-   * @param bids
-   * @param limits
-   * @param adStatistics
-   * @throws AdXException
-   */
-  private static void checkAuctionInput(int day, int supply, Query query, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits,
-      AdStatistics adStatistics) throws AdXException {
-    if (day < 0) {
-      throw new AdXException("Cannot run auction in a negative day");
-    }
-    if (supply <= 0) {
-      throw new AdXException("Cannot run auction withouth at least 1 supply");
-    }
-    if (query == null) {
-      throw new AdXException("Cannot run auction with null query");
-    }
-    if (bids == null) {
-      throw new AdXException("Cannot run auction with null bids");
-    }
-    if (limits == null) {
-      throw new AdXException("Cannot run auction with null daily limits");
-    }
-    if (adStatistics == null) {
-      throw new AdXException("Cannot run auction with null adStatistics");
-    }
-  }
-
-  /**
    * Runs a classic second auction for supply many users for the given list of bids and limits. Ties are broken at random.
    * 
    * @param supply
@@ -89,9 +57,13 @@ public class AdAuctions {
    * @param limits
    * @throws AdXException
    */
-  public static void runSecondPriceAuction(int day, Query query, int supply, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits,
-      AdStatistics adStatistics) throws AdXException {
-    AdAuctions.checkAuctionInput(day, supply, query, bids, limits, adStatistics);
+  public static void runSecondPriceAuction(int day, Query query, int supply, List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, Statistics adStatistics) throws AdXException {
+    InputValidators.validateDay(day);
+    InputValidators.validateSupply(supply);
+    InputValidators.validateNotNull(query);
+    InputValidators.validateNotNull(bids);
+    InputValidators.validateNotNull(limits);
+    InputValidators.validateNotNull(adStatistics);
     Collections.sort(bids, AdAuctions.bidComparator);
     // Keep the auction running while there is supply and at least one bidder.
     while (supply > 0 && bids.size() > 0) {
@@ -125,7 +97,7 @@ public class AdAuctions {
    * @throws AdXException
    */
   private static int multipleWinners(int day, Query query, Double winCost, Pair<Double, List<Pair<String, BidEntry>>> winnerPairList,
-      List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, AdStatistics adStatistics) throws AdXException {
+      List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, Statistics adStatistics) throws AdXException {
     // There are at least two winners. We will allocate only one chosen at random.
     List<Pair<String, BidEntry>> winnerList = winnerPairList.getElement2();
     Collections.shuffle(winnerList);
@@ -133,7 +105,10 @@ public class AdAuctions {
     BidEntry winnerBidEntry = winnerList.get(0).getElement2();
     String winnerName = winnerList.get(0).getElement1();
     Double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
-    Double totalSpendSoFar = adStatistics.getSummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2();
+    Double totalSpendSoFar = 0.0;
+    if(adStatistics.getSummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()) != null) {
+      totalSpendSoFar = adStatistics.getSummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2();
+    }
     Double querySpendSoFar = adStatistics.getStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query).getElement2();
     if (totalSpendSoFar + winCost <= dailyLimit && querySpendSoFar + winCost <= winnerBidEntry.getLimit()) {
       // This guy is allowed to take one more, allocate one more to him.
@@ -166,7 +141,7 @@ public class AdAuctions {
    * @throws AdXException
    */
   private static int uniqueWinner(int day, int supply, Query query, Double winnerCost, Pair<String, BidEntry> winner, List<Pair<String, BidEntry>> bids,
-      Map<Integer, Double> limits, AdStatistics adStatistics) throws AdXException {
+      Map<Integer, Double> limits, Statistics adStatistics) throws AdXException {
     // Remove winner from further consideration.
     //Logging.log("Unique winner = " + winner);
     bids.remove(winner);
@@ -235,7 +210,7 @@ public class AdAuctions {
    * @param adStatistics
    * @throws AdXException
    */
-  public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, AdStatistics adStatistics) throws AdXException {
+  public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, Statistics adStatistics) throws AdXException {
     HashMap<Query, Integer> samplePopulation = Sampling.samplePopulation(Parameters.POPULATION_SIZE);
     //Logging.log(samplePopulation);
     for (Entry<Query, Integer> sample : samplePopulation.entrySet()) {

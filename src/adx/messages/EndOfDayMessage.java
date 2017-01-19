@@ -39,6 +39,16 @@ public class EndOfDayMessage {
   private final List<Campaign> wonCampaings;
 
   /**
+   * The current quality score.
+   */
+  private final double qualityScore;
+
+  /**
+   * The cumulative profit so far.
+   */
+  private final double cumulativeProfit;
+
+  /**
    * Constructor.
    */
   public EndOfDayMessage() {
@@ -48,6 +58,8 @@ public class EndOfDayMessage {
     this.statistics = null;
     this.auctionedCampaings = null;
     this.wonCampaings = null;
+    this.qualityScore = -1;
+    this.cumulativeProfit = -1;
   }
 
   /**
@@ -57,12 +69,14 @@ public class EndOfDayMessage {
    * @param endOfDayTime
    */
   public EndOfDayMessage(int day, String endOfDayTime, Map<Integer, Pair<Integer, Double>> statistics, List<Campaign> auctionedCampaings,
-      List<Campaign> wonCampaings) {
+      List<Campaign> wonCampaings, double qualityScore, double cumulativeProfit) {
     this.day = day;
     this.endOfDayTime = endOfDayTime;
     this.statistics = statistics;
     this.auctionedCampaings = auctionedCampaings;
     this.wonCampaings = wonCampaings;
+    this.qualityScore = qualityScore;
+    this.cumulativeProfit = cumulativeProfit;
   }
 
   /**
@@ -110,9 +124,28 @@ public class EndOfDayMessage {
     return this.statistics;
   }
 
+  /**
+   * Getter.
+   * 
+   * @return the quality score in effect for the agent.
+   */
+  public double getQualityScore() {
+    return this.qualityScore;
+  }
+
+  /**
+   * Getter.
+   * 
+   * @return the cumulative profit for the agent.
+   */
+  public double getCumulativeProfit() {
+    return this.cumulativeProfit;
+  }
+
   @Override
   public String toString() {
-    return "[EndOfDayMessage: \n\t Day: " + this.day + ", \n\t Time: " + this.endOfDayTime + ",\n\t Statistics: " + this.statistics
-        + ", \n\t Campaigns up for auction: " + this.auctionedCampaings + ", \n\t Won campaigns: " + this.wonCampaings + "]";
+    return "\n\t EndOfDayMessage: \n\t\t Day: " + this.day + ", \n\t\t Time: " + this.endOfDayTime + ",\n\t\t Statistics: " + this.statistics
+        + ", \n\t\t Campaigns up for auction: " + this.auctionedCampaings + ", \n\t\t Won campaigns: " + this.wonCampaings + "\n\t\t Quality Score = "
+        + this.qualityScore + "\n\t\t Cumulative Profit: " + this.cumulativeProfit;
   }
 }

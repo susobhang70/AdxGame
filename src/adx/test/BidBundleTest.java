@@ -31,7 +31,7 @@ public class BidBundleTest {
       }
     }, new HashMap<Integer, Double>() {
       {
-        put(1, 13.3);
+        put(1, 100.0);
         put(2, 38.7);
       }
     });

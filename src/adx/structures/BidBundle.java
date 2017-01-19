@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import adx.exceptions.AdXException;
+import adx.util.InputValidators;
 
 /**
  * This is the main structure by which bids on queries are communicated to the server.
@@ -53,13 +54,9 @@ public class BidBundle {
    */
   public BidBundle(int day, Set<BidEntry> bidEntries, Map<Integer, Double> campaignsLimits, Map<Integer, Double> campaignsBid) throws AdXException {
     super();
-    if (day < 0) {
-      throw new AdXException("The day must be a non-negative integer.");
-    }
+    InputValidators.validateDay(day);
     this.day = day;
-    if (bidEntries == null) {
-      throw new AdXException("The bidEntries must be non-null");
-    }
+    InputValidators.validateNotNull(bidEntries);
     this.bidEntries = bidEntries;
     this.campaignsLimits = campaignsLimits;
     this.campaignsBid = campaignsBid;

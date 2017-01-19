@@ -10,7 +10,6 @@ import java.util.Set;
 import adx.exceptions.AdXException;
 import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
-import adx.messages.InitialMessage;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;
@@ -27,42 +26,44 @@ public class GameAgent extends Agent {
   /**
    * A map that keeps track of the campaigns owned by the agent.
    */
-  protected Map<Integer, Campaign> myCampaigns;
-  
+  protected Map<Integer, List<Campaign>> myCampaigns;
+
   /**
    * A map that keeps track of campaigns owned by other agents.
    */
   protected Map<Integer, Campaign> theirCampaigns;
-  
+
   /**
    * A map that keeps track of campaign opportunities.
    */
   protected List<Campaign> campaignOpportunity;
 
   /**
+   * Keeps the current quality score received by the server.
+   */
+  protected Double currentQualityScore;
+
+  /**
    * Constructor.
    * 
-   * @param host - on which the agent will try to connect.
-   * @param port - the agent will use for the connection.
+   * @param host
+   *          - on which the agent will try to connect.
+   * @param port
+   *          - the agent will use for the connection.
    */
   public GameAgent(String host, int port) {
     super(host, port);
-    this.myCampaigns = new HashMap<Integer, Campaign>();
-  }
-
-  @Override
-  protected void handleInitialMessage(InitialMessage initialMessage) {
-    Logging.log("[-] handleInitialMessage");
-    Campaign initialCampaign = initialMessage.getInitialCampaign();
-    Logging.log("\t[-] initialCampaign = " + initialCampaign);
-    this.myCampaigns.put(1, initialCampaign);
+    this.myCampaigns = new HashMap<Integer, List<Campaign>>();
   }
 
   @Override
   protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
-    Logging.log("[-] handleEndOfDayMessage " + endOfDayMessage + ", current time = " + Instant.now());
+    Logging.log("[-] handleEndOfDayMessage " + endOfDayMessage);
+    Logging.log("[-] Current time = " + Instant.now());
     try {
       this.campaignOpportunity = endOfDayMessage.getCampaignsForAuction();
+      this.myCampaigns.put(endOfDayMessage.getDay(), endOfDayMessage.getCampaignsWon());
+      this.currentQualityScore = endOfDayMessage.getQualityScore();
       BidBundle bidBundle = this.getAdBid(endOfDayMessage.getDay());
       if (bidBundle != null) {
         this.getClient().sendTCP(bidBundle);
@@ -71,7 +72,7 @@ public class GameAgent extends Agent {
       Logging.log("[x] Something went wrong getting the bid bundle for day " + endOfDayMessage.getDay() + " -> " + e.getMessage());
     }
   }
-  
+
   /**
    * Computes the campaign bids.
    * 
@@ -79,8 +80,8 @@ public class GameAgent extends Agent {
    */
   protected Map<Integer, Double> getCampaignBids() {
     Map<Integer, Double> campaignBids = new HashMap<Integer, Double>();
-    for(Campaign camp : this.campaignOpportunity) {
-      campaignBids.put(camp.getId(), new Double(camp.getReach()));
+    for (Campaign camp : this.campaignOpportunity) {
+      campaignBids.put(camp.getId(), new Double((camp.getReach() * 0.1) / this.currentQualityScore));
     }
     return campaignBids;
   }
@@ -88,25 +89,28 @@ public class GameAgent extends Agent {
   /**
    * Produces and sends a bidbundle for the given day.
    * 
-   * @param day - the day for which we want a bid bundle
-   * @throws AdXException in case something went wrong creating the bid bundle.
+   * @param day
+   *          - the day for which we want a bid bundle
+   * @throws AdXException
+   *           in case something went wrong creating the bid bundle.
    */
   protected BidBundle getAdBid(int day) throws AdXException {
-    // Get my active campaign for this day.
-    Campaign c = this.myCampaigns.get(day);
+    // Get the list of active campaigns for this day.
+    List<Campaign> myList = this.myCampaigns.get(day);
+    Set<BidEntry> bidEntries = new HashSet<BidEntry>();
+    Map<Integer, Double> limits = new HashMap<Integer, Double>();
     // If I have a campaign, prepare and send bid bundle.
-    if (this.myCampaigns.containsKey(day)) {
-      Logging.log("\t[-] Preparing and sending Ad Bid for day " + day + ", and campaign " + c);
-      BidEntry bidEntry = new BidEntry(c.getId(), new Query(c.getMarketSegment()), c.getBudget() / c.getReach(), c.getBudget());
-      Set<BidEntry> bidEntries = new HashSet<BidEntry>();
-      bidEntries.add(bidEntry);
-      Map<Integer, Double> limits = new HashMap<Integer, Double>();
-      limits.put(c.getId(), c.getBudget());
-      return new BidBundle(day, bidEntries, limits, this.getCampaignBids());
+    if (myList != null) {
+      Logging.log("\t[-] Preparing and sending Ad Bid for day " + day);
+      for (Campaign c : myList) {
+        BidEntry bidEntry = new BidEntry(c.getId(), new Query(c.getMarketSegment()), c.getBudget() / c.getReach(), c.getBudget());
+        bidEntries.add(bidEntry);
+        limits.put(c.getId(), c.getBudget());
+      }
     } else {
       Logging.log("\t[-] No campaings present on day " + day);
     }
-    return null;
+    return new BidBundle(day, bidEntries, limits, this.getCampaignBids());
   }
 
   /**

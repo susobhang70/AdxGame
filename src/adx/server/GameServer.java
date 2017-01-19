@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import adx.exceptions.AdXException;
 import adx.messages.EndOfDayMessage;
-import adx.messages.InitialMessage;
 import adx.structures.Campaign;
 import adx.util.Logging;
 import adx.util.Parameters;
@@ -25,10 +24,8 @@ public class GameServer extends GameServerAbstract {
   /**
    * Constructor.
    * 
-   * @param port
-   *          - on which the server will run.
-   * @throws IOException
-   *           in case the server could not be started.
+   * @param port - on which the server will run.
+   * @throws IOException in case the server could not be started.
    */
   public GameServer(int port) throws IOException {
     super(port);
@@ -36,19 +33,20 @@ public class GameServer extends GameServerAbstract {
 
   /**
    * Runs the game.
+   * @throws AdXException 
    */
-  protected void runAdXGame() {
+  protected void runAdXGame() throws AdXException {
     // First order of business is to accept connections for a fixed amount of time
     Instant deadlineForNewPlayers = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
     Logging.log("[-] Accepting connections until " + deadlineForNewPlayers);
-    while (Instant.now().isBefore(deadlineForNewPlayers))
-      ;
+    while (Instant.now().isBefore(deadlineForNewPlayers));
     // Do not accept any new agents beyond deadline. Play with present agents.
     this.acceptingNewPlayers = false;
+    this.serverState.initStatistics();
     // Check if there is at least one agent to play the game.
     if (this.namesToConnections.size() > 0) {
       Instant endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
-      this.sendInitialMessage();
+      this.setUpGame();
       this.sendEndOfDayMessage();
       // Play game
       while (true) {
@@ -63,8 +61,9 @@ public class GameServer extends GameServerAbstract {
               try {
                 this.serverState.runAdAuctions();
                 this.serverState.runCampaignAuctions();
+                this.serverState.updateDailyStatistics();
               } catch (AdXException e) {
-                Logging.log("[x] Error running ad auction -> " + e.getMessage());
+                Logging.log("[x] Error running some auction -> " + e.getMessage());
               }
               endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
               this.sendEndOfDayMessage();
@@ -79,17 +78,14 @@ public class GameServer extends GameServerAbstract {
   }
 
   /**
-   * Send the initial message to all registered agents.
+   * Sample initial campaings.
    */
-  private synchronized void sendInitialMessage() {
-    Logging.log("[-] Sending initial message to:");
-    for (Entry<String, Connection> agent : this.namesToConnections.entrySet()) {
-      Logging.log("\t[-] " + agent.getKey() + ", " + agent.getValue());
-      Connection agentConnection = agent.getValue();
+  private synchronized void setUpGame() {
+    Logging.log("[-] Set Up game, sample initial campaigns:");
+    for (String agent : this.connectionsToNames.values()) {
       try {
         Campaign c = Sampling.sampleInitialCampaign();
-        this.serverState.registerCampaign(c, agent.getKey());
-        agentConnection.sendTCP(new InitialMessage(c, this.gameNumber));
+        this.serverState.registerCampaign(c, agent);
       } catch (AdXException e) {
         Logging.log("Error trying to sample an initial campaign.");
         e.printStackTrace();
@@ -111,9 +107,10 @@ public class GameServer extends GameServerAbstract {
       Logging.log("[x] Error sampling list of campaigns for auction --> " + e.getMessage());
     }
     for (Entry<String, Connection> agent : this.namesToConnections.entrySet()) {
+      String agentName = agent.getKey();
       agent.getValue().sendTCP(
-          new EndOfDayMessage(this.serverState.getCurrentDay() + 1, timeEndOfDay.toString(), this.serverState.getSummaryStatistic(agent.getKey()),
-              listOfCampaigns, this.serverState.getWonCampaigns(agent.getKey())));
+          new EndOfDayMessage(this.serverState.getCurrentDay() + 1, timeEndOfDay.toString(), this.serverState.getSummaryStatistic(agentName), listOfCampaigns,
+              this.serverState.getWonCampaigns(agentName), this.serverState.getQualitScore(agentName), this.serverState.getProfit(agentName)));
     }
   }
 
@@ -121,8 +118,9 @@ public class GameServer extends GameServerAbstract {
    * Main server method.
    * 
    * @param args
+   * @throws AdXException 
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws AdXException {
     try {
       // Try to initialize the server.
       new GameServer(9898).runAdXGame();

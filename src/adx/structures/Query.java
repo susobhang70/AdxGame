@@ -3,6 +3,7 @@ package adx.structures;
 import java.util.Objects;
 
 import adx.exceptions.AdXException;
+import adx.util.InputValidators;
 
 /**
  * A query represents a market segment together with all possible attributes such as: publisher device and adtype.
@@ -25,8 +26,10 @@ public class Query {
    * Constructor.
    * 
    * @param marketSegment
+   * @throws AdXException 
    */
-  public Query(MarketSegment marketSegment) {
+  public Query(MarketSegment marketSegment) throws AdXException {
+    InputValidators.validateNotNull(marketSegment);
     this.marketSegment = marketSegment;
   }
 

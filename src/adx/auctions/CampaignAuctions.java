@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
+import adx.structures.Campaign;
 import adx.util.Pair;
 
 /**
@@ -76,18 +77,29 @@ public class CampaignAuctions {
    * @param bidBundles
    * @throws AdXException
    */
-  public static List<Pair<String, Double>> filterBids(int campaignId, Map<String, BidBundle> bidBundles) throws AdXException {
-    if (campaignId <= 0) {
+  public static List<Pair<String, Double>> filterBids(Campaign campaign, Map<String, BidBundle> bidBundles, Map<String, Double> qualityScores) throws AdXException {
+    if (campaign.getId() <= 0) {
       throw new AdXException("The id of a campaign must be a positive integer");
     }
     if (bidBundles == null) {
       throw new AdXException("The bid bundles must not be null");
     }
+    if (qualityScores == null) {
+      throw new AdXException("The quality score map must not be null");
+    }
     List<Pair<String, Double>> bids = new ArrayList<Pair<String, Double>>();
     for (Entry<String, BidBundle> agentBid : bidBundles.entrySet()) {
-      Double bidValue = agentBid.getValue().getCampaignBid(campaignId);
+      String agentName = agentBid.getKey();
+      Double bidValue = agentBid.getValue().getCampaignBid(campaign.getId());
       if (bidValue != null) {
-        bids.add(new Pair<String, Double>(agentBid.getKey(), bidValue));
+        if(!qualityScores.containsKey(agentName)) {
+          throw new AdXException("Unable to find quality score for agent " + agentName);
+        }
+        Double qualityScore = qualityScores.get(agentName);
+        //Logging.log("\t\t\t For agent: " + agentName + ", with quality: " + qualityScore + ", campaign bid must be in range [" + ((campaign.getReach() * 0.1) / qualityScore) + "," + (qualityScore * campaign.getReach()) + "], received bid = " + bidValue);
+        if (bidValue >= ((campaign.getReach() * 0.1) / qualityScore) && bidValue <= (qualityScore * campaign.getReach())) {
+          bids.add(new Pair<String, Double>(agentName, bidValue));
+        }
       }
     }
     return bids;
