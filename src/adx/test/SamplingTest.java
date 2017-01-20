@@ -9,7 +9,9 @@ import org.junit.Test;
 
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
+import adx.structures.MarketSegment;
 import adx.structures.Query;
+import adx.util.Logging;
 import adx.util.Sampling;
 
 public class SamplingTest {
@@ -33,7 +35,12 @@ public class SamplingTest {
 
   @Test
   public void testSampleCampaign() throws AdXException {
-    assertTrue(Sampling.sampleCampaign() instanceof Campaign);
+    assertTrue(Sampling.sampleCampaign(0) instanceof Campaign);
   }
-
+  
+  @Test
+  public void testCampaignData() throws AdXException {
+    Logging.log(new Campaign(1, 1, 3, MarketSegment.FEMALE_OLD_HIGH_INCOME, 100));
+    Logging.log(Sampling.sampleCampaignOpportunityMessage(17, MarketSegment.proportionsList));
+  }
 }

@@ -174,20 +174,27 @@ public class ServerState {
    */
   public void validateBidBundle(int day, BidBundle bidBundle, String agent) throws AdXException {
     if (day != this.currentDay + 1) {
-      throw new AdXException("Received Bid bundle for day " + day + " for agent " + agent + ", but currently accepting for day " + (this.currentDay + 1)
-          + ". Bid Bundle not accepted.");
+      throw new AdXException("Received Bid bundle for day " + day + " for agent " + agent + ", but currently accepting for day " + (this.currentDay + 1) + ". Bid Bundle not accepted.");
     }
     for (BidEntry bidEntry : bidBundle.getBidEntries()) {
-      if (!this.statistics.campaignExists(bidEntry.getCampaignId())) {
+      int campaignId = bidEntry.getCampaignId();
+      if (!this.statistics.campaignExists(campaignId)) {
         Logging.log(bidBundle);
         Logging.log(bidEntry);
         throw new AdXException("The entry " + bidEntry + " refers to a non-existing campaign.");
-      } else if (!this.statistics.isOwner(bidEntry.getCampaignId(), agent)) {
+      } else if (!this.statistics.isOwner(campaignId, agent)) {
         throw new AdXException("The entry " + bidEntry + " refers to a campaign not owned by the agent.");
       } else if (bidEntry.getQuery() == null) {
         throw new AdXException("The entry " + bidEntry + " refers to a null query.");
       } else if (bidEntry.getLimit() < bidEntry.getBid()) {
         throw new AdXException("The entry " + bidEntry + " limit is less than the bid.");
+      } else {
+        Campaign c = this.statistics.getCampaign(campaignId);
+        if (c.getStartDay() > day) {
+          throw new AdXException("The entry" + bidEntry + " refers to campaign that hasn't started yet: " + this.statistics.getCampaign(campaignId));
+        } else if(c.getEndDay() < day) {
+          throw new AdXException("The entry" + bidEntry + " refers to campaign that already ended: " + this.statistics.getCampaign(campaignId));
+        }
       }
     }
   }
@@ -210,7 +217,7 @@ public class ServerState {
    */
   public List<Campaign> generateCampaignsOpportunities() throws AdXException {
     if (!this.campaignsForAuction.containsKey(this.currentDay + 1)) {
-      List<Campaign> listOfCampaigns = Sampling.sampleCampaingList(Parameters.NUMBER_AUCTION_CAMPAINGS);
+      List<Campaign> listOfCampaigns = Sampling.sampleCampaingList(this.currentDay + 1, Parameters.NUMBER_AUCTION_CAMPAINGS);
       this.campaignsForAuction.put(this.currentDay + 1, listOfCampaigns);
     } else {
       throw new AdXException("[x] Already sample campaign opportunities for day: " + (this.currentDay + 1));
@@ -325,8 +332,9 @@ public class ServerState {
         "\n\t EndOfDay: " + ((this.currentDayEnd != null) ? this.currentDayEnd.toString() : "" ) +
         "\n\t Agents Names: " + this.agentsNames + 
         "\n\t Campaings Ownership: " + this.statistics.printNiceCampaignOwnership() + 
-        "\n\t Map of Campaigns: " + this.statistics.printNiceCampaignTable() +
-    // "\n\t BidBundles = " + this.bidBundles +
+        "\n\t Campaings: " + this.statistics.printNiceCampaignTable() + 
+        "\n\t Map of Campaigns: " + this.statistics.printNiceAgentCampaignTable() +
+        //"\n\t BidBundles = " + this.bidBundles +
         "\n\t Campaign For Auction: " + this.printNiceCampaignForAuctionList()
         );
     if (this.statistics != null)

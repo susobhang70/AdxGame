@@ -1,6 +1,7 @@
 package adx.agent;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import adx.exceptions.AdXException;
-import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
@@ -24,14 +24,13 @@ import adx.util.Logging;
 public class GameAgent extends Agent {
 
   /**
+   * Current simulated day.
+   */
+  protected int currentDay;
+  /**
    * A map that keeps track of the campaigns owned by the agent.
    */
-  protected Map<Integer, List<Campaign>> myCampaigns;
-
-  /**
-   * A map that keeps track of campaigns owned by other agents.
-   */
-  protected Map<Integer, Campaign> theirCampaigns;
+  protected List<Campaign> myCampaigns;
 
   /**
    * A map that keeps track of campaign opportunities.
@@ -44,28 +43,58 @@ public class GameAgent extends Agent {
   protected Double currentQualityScore;
 
   /**
+   * Empty constructor. For testing purposes only.
+   */
+  public GameAgent() {
+    this.init();
+  }
+
+  /**
    * Constructor.
    * 
-   * @param host
-   *          - on which the agent will try to connect.
-   * @param port
-   *          - the agent will use for the connection.
+   * @param host - on which the agent will try to connect.
+   * @param port - the agent will use for the connection.
    */
   public GameAgent(String host, int port) {
     super(host, port);
-    this.myCampaigns = new HashMap<Integer, List<Campaign>>();
+    this.init();
   }
 
+  public void init() {
+    this.myCampaigns = new ArrayList<Campaign>();
+  }
+
+  /**
+   * Return the list of active campaigns.
+   * 
+   * @return the list of active campaigns.
+   */
+  public List<Campaign> getActiveCampaigns() {
+    List<Campaign> activeCampaigns = new ArrayList<Campaign>();
+    for (Campaign c : this.myCampaigns) {
+      if (this.currentDay >= c.getStartDay() && this.currentDay <= c.getEndDay()) {
+        activeCampaigns.add(c);
+      }
+    }
+    return activeCampaigns;
+  }
+
+  /**
+   * Parse the end of day message.
+   */
   @Override
-  protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
+  public void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
     Logging.log("[-] handleEndOfDayMessage " + endOfDayMessage);
     Logging.log("[-] Current time = " + Instant.now());
     try {
+      this.currentDay = endOfDayMessage.getDay();
       this.campaignOpportunity = endOfDayMessage.getCampaignsForAuction();
-      this.myCampaigns.put(endOfDayMessage.getDay(), endOfDayMessage.getCampaignsWon());
+      if (endOfDayMessage.getCampaignsWon() != null) {
+        this.myCampaigns.addAll(endOfDayMessage.getCampaignsWon());
+      }
       this.currentQualityScore = endOfDayMessage.getQualityScore();
-      BidBundle bidBundle = this.getAdBid(endOfDayMessage.getDay());
-      if (bidBundle != null) {
+      BidBundle bidBundle = this.getAdBid();
+      if (bidBundle != null && this.getClient() != null && this.getClient().isConnected()) {
         this.getClient().sendTCP(bidBundle);
       }
     } catch (AdXException e) {
@@ -80,8 +109,12 @@ public class GameAgent extends Agent {
    */
   protected Map<Integer, Double> getCampaignBids() {
     Map<Integer, Double> campaignBids = new HashMap<Integer, Double>();
-    for (Campaign camp : this.campaignOpportunity) {
-      campaignBids.put(camp.getId(), new Double((camp.getReach() * 0.1) / this.currentQualityScore));
+    if (this.campaignOpportunity != null) {
+      for (Campaign camp : this.campaignOpportunity) {
+        campaignBids.put(camp.getId(), new Double((camp.getReach() * 0.1) / this.currentQualityScore));
+      }
+    } else {
+      Logging.log("[-] No campaign opportunites present for day " + this.currentDay);
     }
     return campaignBids;
   }
@@ -94,23 +127,24 @@ public class GameAgent extends Agent {
    * @throws AdXException
    *           in case something went wrong creating the bid bundle.
    */
-  protected BidBundle getAdBid(int day) throws AdXException {
+  public BidBundle getAdBid() throws AdXException {
     // Get the list of active campaigns for this day.
-    List<Campaign> myList = this.myCampaigns.get(day);
     Set<BidEntry> bidEntries = new HashSet<BidEntry>();
     Map<Integer, Double> limits = new HashMap<Integer, Double>();
     // If I have a campaign, prepare and send bid bundle.
-    if (myList != null) {
-      Logging.log("\t[-] Preparing and sending Ad Bid for day " + day);
-      for (Campaign c : myList) {
+    List<Campaign> myActiveCampaigns = this.getActiveCampaigns();
+    if (myActiveCampaigns != null && myActiveCampaigns.size() > 0) {
+      Logging.log("[-] Preparing and sending Ad Bid for day " + this.currentDay);
+      Logging.log("[-] Active campaigns are: " + myActiveCampaigns);
+      for (Campaign c : myActiveCampaigns) {
         BidEntry bidEntry = new BidEntry(c.getId(), new Query(c.getMarketSegment()), c.getBudget() / c.getReach(), c.getBudget());
         bidEntries.add(bidEntry);
         limits.put(c.getId(), c.getBudget());
       }
     } else {
-      Logging.log("\t[-] No campaings present on day " + day);
+      Logging.log("[-] No campaings present on day " + this.currentDay);
     }
-    return new BidBundle(day, bidEntries, limits, this.getCampaignBids());
+    return new BidBundle(this.currentDay, bidEntries, limits, this.getCampaignBids());
   }
 
   /**
@@ -120,17 +154,23 @@ public class GameAgent extends Agent {
    */
   public static void main(String[] args) {
     GameAgent agent = new GameAgent("localhost", 9898);
-    try {
-      ConnectServerMessage request = new ConnectServerMessage();
-      request.setAgentName("agent1");
-      request.setAgentPassword("123456");
-      agent.getClient().sendTCP(request);
-      while (true)
-        ;
-    } catch (Exception e) {
-      Logging.log("[x] Error trying to connect to the server!");
-      e.printStackTrace();
+    agent.connect("agent0", "123456");
+  }
+
+  public String printNiceListMyCampaigns() {
+    String ret = "";
+    if (this.myCampaigns.size() > 0) {
+      for (Campaign c : this.myCampaigns) {
+        ret += "\n\t\t" + c;
+      }
+    } else {
+      ret += "No campaigns registered for this agent.";
     }
+    return ret;
+  }
+
+  public String toString() {
+    return "Agent: " + this.agentName + "\n\tMy Campaigns: " + this.printNiceListMyCampaigns();
   }
 
 }

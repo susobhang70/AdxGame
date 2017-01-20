@@ -13,19 +13,46 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 /**
- * This class implements common methods for an agent playing the game. This is
- * an abstract class that must be extended by an agent that wants to play the
- * game.
+ * This class implements common methods for an agent playing the game. This is an abstract class that must be extended by an agent that wants to play the game.
  * 
  * @author Enrique Areyan Viqueira
  *
  */
 public abstract class Agent {
 
+  protected String agentName = null;
+
   /**
    * Kryo object to communicate with server.
    */
   private final Client client;
+
+  public Agent() {
+    client = null;
+  }
+
+  /**
+   * Connects the agent and registers its name.
+   * 
+   * @param name
+   * @param password
+   */
+  protected void connect(String name, String password) {
+    if (this.agentName == null) {
+      this.agentName = name;
+    }
+    try {
+      ConnectServerMessage request = new ConnectServerMessage();
+      request.setAgentName(name);
+      request.setAgentPassword(password);
+      this.getClient().sendTCP(request);
+      while (true)
+        ;
+    } catch (Exception e) {
+      Logging.log("[x] Error trying to connect to the server!");
+      e.printStackTrace();
+    }
+  }
 
   /**
    * Constructor.
@@ -49,7 +76,7 @@ public abstract class Agent {
     this.client.addListener(new Listener() {
       public void received(Connection connection, Object message) {
         synchronized (agent) {
-          //Logging.log("Received message from server " + message);
+          // Logging.log("Received message from server " + message);
           try {
             if (message instanceof ConnectServerMessage) {
               handleConnectServerMessage((ConnectServerMessage) message);
@@ -85,7 +112,7 @@ public abstract class Agent {
       break;
     case 1:
       // In this case the agent can play
-      Logging.log("[-] Agent is in the game!");
+      Logging.log("[-] Agent: " + this.agentName + " is in the game!");
       break;
     default:
       throw new Exception("[x] Unknown response code from server");
@@ -100,14 +127,15 @@ public abstract class Agent {
   protected Client getClient() {
     return this.client;
   }
-  
+
   /**
    * This method hanldes the ACK message.
+   * 
    * @param message
    */
   protected void handleACKMessage(ACKMessage message) {
-    if(message.getCode()) {
-      Logging.log("[-] ACK Message, all ok, " + message.getMessage()); 
+    if (message.getCode()) {
+      Logging.log("[-] ACK Message, all ok, " + message.getMessage());
     } else {
       Logging.log("[x] ACK Message, error, " + message.getMessage());
     }

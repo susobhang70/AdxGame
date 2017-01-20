@@ -46,6 +46,18 @@ public class InputValidators {
   }
 
   /**
+   * Checks if the id of a campaign is in the valid range.
+   * 
+   * @param campaignId
+   * @throws AdXException
+   */
+  public static void validateCampaignDuration(int startDay, int endDay) throws AdXException {
+    if (startDay <= 0 || endDay <= 0 || startDay > endDay) {
+      throw new AdXException("Invalid campaign duration. A campaign cannot start on: " + startDay + " and end on: " + endDay);
+    }
+  }
+
+  /**
    * Checks if the reach of a campaign is in the valid range.
    * 
    * @param reach

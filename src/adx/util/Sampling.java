@@ -16,8 +16,7 @@ import adx.structures.MarketSegment;
 import adx.structures.Query;
 
 /**
- * This class implements logic to sample a population of users given their
- * proportions.
+ * This class implements logic to sample a population of users given their proportions.
  * 
  * @author Enrique Areyan Viqueira
  */
@@ -27,27 +26,27 @@ public class Sampling {
    * Contains a map pointing to the market segments to be sample.
    */
   public static final Map<MarketSegment, Integer> segmentsToSample;
-  
+
   /**
    * Contains a list of market segment and its cumulative probability.
    */
   public static ArrayList<Entry<MarketSegment, Integer>> cumulativeMarketSegments;
-  
+
   /**
    * Total proportion of all users. Usually this number is 10000.
    */
   public static Integer totalProportion = 0;
-  
+
   /**
    * Different campaign reach factors.
    */
   private static final double[] campaignReachFactor = { 0.2, 0.5, 0.8 };
-  
+
   /**
    * A unique identifier for campaigns ids.
    */
   public static int campaignId = 0;
-  
+
   static {
     // Initialize static structures only once.
     HashSet<MarketSegment> setOfSegments = new HashSet<MarketSegment>();
@@ -59,9 +58,9 @@ public class Sampling {
     setOfSegments.add(MarketSegment.FEMALE_YOUNG_HIGH_INCOME);
     setOfSegments.add(MarketSegment.FEMALE_OLD_LOW_INCOME);
     setOfSegments.add(MarketSegment.FEMALE_OLD_HIGH_INCOME);
-    
+
     HashMap<MarketSegment, Integer> initSegmentsToSample = new HashMap<MarketSegment, Integer>();
-    for(MarketSegment m : setOfSegments) {
+    for (MarketSegment m : setOfSegments) {
       initSegmentsToSample.put(m, MarketSegment.proportionsMap.get(m));
     }
     segmentsToSample = Collections.unmodifiableMap(initSegmentsToSample);
@@ -74,11 +73,10 @@ public class Sampling {
   }
 
   /**
-   * Given a size of a population n, produces a random population of n users
-   * according to the parameters of the game.
+   * Given a size of a population n, produces a random population of n users according to the parameters of the game.
    * 
    * @param n
-   * @throws AdXException 
+   * @throws AdXException
    */
   // TODO: this method could be optimized. Since the cumulative distribution
   // is fixed, create an array (or map) of size 10000 that maps directly to the market segment.
@@ -102,7 +100,7 @@ public class Sampling {
     }
     return population;
   }
-  
+
   /**
    * Samples a campaign to be sent to agents at the start of the game.
    * 
@@ -111,11 +109,11 @@ public class Sampling {
    */
   public static Campaign sampleInitialCampaign() throws AdXException {
     // The only difference is that the budget equals 1$ per impression.
-    Campaign initialCampaign = Sampling.sampleCampaign();
+    Campaign initialCampaign = Sampling.sampleCampaign(0);
     initialCampaign.setBudget(initialCampaign.getReach());
     return initialCampaign;
   }
-  
+
   /**
    * Samples a campaign among all possible market segments (1, 2 or 3 letter segments)
    * 
@@ -123,25 +121,25 @@ public class Sampling {
    * @return a campaign with a random reach and market segment.
    * @throws AdXException
    */
-  public static Campaign sampleCampaign() throws AdXException {
-    return Sampling.sampleCampaignOpportunityMessage(MarketSegment.proportionsList);
+  public static Campaign sampleCampaign(int day) throws AdXException {
+    return Sampling.sampleCampaignOpportunityMessage(day, MarketSegment.proportionsList);
   }
-  
+
   /**
-   * Samples a list of n campaign. 
+   * Samples a list of n campaign.
    * 
    * @param n
    * @return a list of n random campaigns.
    * @throws AdXException
    */
-  public static List<Campaign> sampleCampaingList(int n) throws AdXException {
+  public static List<Campaign> sampleCampaingList(int day, int n) throws AdXException {
     ArrayList<Campaign> campaignsList = new ArrayList<Campaign>();
-    for(int i = 0 ; i < n; i++) {
-      campaignsList.add(Sampling.sampleCampaign());
+    for (int i = 0; i < n; i++) {
+      campaignsList.add(Sampling.sampleCampaign(day));
     }
     return campaignsList;
   }
-  
+
   /**
    * This method draws a campaign as the game would.
    * 
@@ -149,7 +147,7 @@ public class Sampling {
    * @return a CampaignOpportunityMessage with a sample campaign.
    * @throws AdXException
    */
-  private static Campaign sampleCampaignOpportunityMessage(List<Entry<MarketSegment, Integer>> candidateSegments) throws AdXException {
+  public static Campaign sampleCampaignOpportunityMessage(int day, List<Entry<MarketSegment, Integer>> candidateSegments) throws AdXException {
     Random randomGenerator = new Random();
     // Get a random Market Segment and the number of users |C_S| in that segment.
     Entry<MarketSegment, Integer> randomEntry = candidateSegments.get(randomGenerator.nextInt(candidateSegments.size()));
@@ -157,9 +155,11 @@ public class Sampling {
     int sizeOfRandomSegment = randomEntry.getValue();
     // Determine the random campaign reach level factor C_RL.
     double randomReachFactor = Sampling.campaignReachFactor[randomGenerator.nextInt(Sampling.campaignReachFactor.length)];
-    // Compute the actual reach (see game specs, C_R = C_RL * |C_S|.
-    int reach = (int) Math.floor(randomReachFactor * sizeOfRandomSegment);
-    return new Campaign(++Sampling.campaignId, randomSegment, reach);
+    // Determine the random length of the campaign C_L
+    int randomDuration = Parameters.CAMPAIGN_DURATIONS.get(randomGenerator.nextInt(Parameters.CAMPAIGN_DURATIONS.size()));
+    // Compute the actual reach (see game specs, C_R = C_RL * |C_S| * C_L.
+    int reach = (int) Math.floor(randomReachFactor * sizeOfRandomSegment * randomDuration);
+    return new Campaign(++Sampling.campaignId, day + 1, day + randomDuration, randomSegment, reach);
   }
 
 }

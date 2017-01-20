@@ -100,7 +100,7 @@ public class CampaignAuctionsTest {
   @Test(expected = AdXException.class)
   public void testFilterBids0() throws AdXException {
     Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, MarketSegment.FEMALE, 999), bidBundles, null);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, 1, 1, MarketSegment.FEMALE, 999), bidBundles, null);
     assertEquals(filteredBids.size(), 0);
   }
 
@@ -108,7 +108,7 @@ public class CampaignAuctionsTest {
   public void testFilterBids1() throws AdXException {
     Map<String, BidBundle> bidBundles = BidBundleTest.getTableBidBundles().row(0);
     Map<String, Double> qualityScores = new HashMap<String, Double>();
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(999, 1, 1, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
     assertEquals(filteredBids.size(), 0);
   }
   
@@ -120,7 +120,7 @@ public class CampaignAuctionsTest {
     qualityScores.put("agent1", 1.0);
     qualityScores.put("agent2", 1.0);
     qualityScores.put("agent3", 1.0);
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, 1, 1, MarketSegment.FEMALE, 999), bidBundles, qualityScores);
     assertEquals(filteredBids.size(), 1);
   }
 
@@ -132,7 +132,7 @@ public class CampaignAuctionsTest {
     qualityScores.put("agent1", 1.0);
     qualityScores.put("agent2", 1.0);
     qualityScores.put("agent3", 1.0);
-    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, MarketSegment.FEMALE, 1500), bidBundles, qualityScores);
+    List<Pair<String, Double>> filteredBids = CampaignAuctions.filterBids(new Campaign(1, 1, 1, MarketSegment.FEMALE, 1500), bidBundles, qualityScores);
     assertEquals(filteredBids.size(), 0);
   }
 

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
+import adx.structures.MarketSegment;
 import adx.structures.Query;
 import adx.util.InputValidators;
 import adx.util.Pair;
@@ -32,30 +33,35 @@ public class Statistics {
   /**
    * A map from Day -> Agent -> Quality Score.
    */
-  private Table<Integer, String, Double> qualityScores;
+  private final Table<Integer, String, Double> qualityScores;
 
   /**
    * A map from Day -> Agent -> Profit
    */
-  private Table<Integer, String, Double> profit;
+  private final Table<Integer, String, Double> profit;
 
   /**
-   * A map from Campaign -> Agent.
+   * A map from IdCampaign -> Agent.
    */
-  private Map<Integer, String> campaignsOwnership;
+  private final Map<Integer, String> campaignsOwnership;
+  
+  /**
+   * A map from IdCampaign -> Campaign
+   */
+  private final Map<Integer, Campaign> campaigns;
 
   /**
    * A map from Day -> Agent -> List of Campaigns.
    */
-  private Table<Integer, String, List<Campaign>> agentsCampaings;
+  private final Table<Integer, String, List<Campaign>> agentsCampaings;
 
   /**
-   * A table that maps: Days -> Agent -> Campaign -> Query -> (Win Count, Win Cost)
+   * A table that maps: Days -> Agent -> IdCampaign -> Query -> (Win Count, Win Cost)
    */
   private final Table<Integer, String, Table<Integer, Query, Pair<Integer, Double>>> statistics;
 
   /**
-   * A table that maps: Days -> Agent -> Campaign > (Total Win Count, Total Win Cost)
+   * A table that maps: Days -> Agent -> IdCampaign > (Total Win Count, Total Win Cost)
    */
   private final Table<Integer, String, Map<Integer, Pair<Integer, Double>>> summary;
 
@@ -73,6 +79,7 @@ public class Statistics {
       this.profit.put(0, agent, 0.0);
     }
     this.campaignsOwnership = new HashMap<Integer, String>();
+    this.campaigns = new HashMap<Integer, Campaign>();
     this.agentsCampaings = HashBasedTable.create();
     this.statistics = HashBasedTable.create();
     this.summary = HashBasedTable.create();
@@ -114,63 +121,71 @@ public class Statistics {
    */
   public void updateDailyStatistics(int day) throws AdXException {
     for (String agent : this.agentsNames) {
-      this.qualityScores.put(day, agent, this.computeQualityScore(day, agent));
-      this.profit.put(day, agent, this.computeCumulativeProfit(day, agent));
+      Pair<Double, Double> data = this.computeQualityScoreAndCumulativeProfit(day, agent);
+      this.qualityScores.put(day, agent, data.getElement1());
+      this.profit.put(day, agent, data.getElement2());
     }
   }
-
+  
   /**
-   * Given a day and an agent, computes the agent's quality score.
    * 
    * @param day
    * @param agent
-   * @return the agent's quality score for the day.
+   * @return
+   * @throws AdXException
    */
-  public Double computeQualityScore(int day, String agent) {
-    // We will compute the quality score using yesterday's campaigns and quality score
+  public Pair<Double, Double> computeQualityScoreAndCumulativeProfit(int day, String agent) throws AdXException {
     List<Campaign> campaigns = this.agentsCampaings.get(day - 1, agent);
     double qualityScore = this.getQualityScore(day - 1, agent);
-    // We need today's statistics.
-    Map<Integer, Pair<Integer, Double>> statistics = this.summary.get(day, agent);
     double averageEffectiveReachRatio = 0.0;
-    // Logging.log("\t\t\tCompute Quality Score for day: " + day);
-    // Logging.log("\t\t\tFor these campaigns: " + campaigns);
-    // Logging.log("\t\t\tUsing these statistics: " + statistics);
+    Double profit = this.getProfit(day - 1, agent);
     if (campaigns != null && campaigns.size() > 0) {
-      if (statistics != null) {
-        for (Campaign c : campaigns) {
-          Pair<Integer, Double> stat = statistics.get(c.getId());
-          if (stat != null) {
-            averageEffectiveReachRatio += this.getEffectiveReach(stat.getElement1(), c.getReach());
-          }
-        }
-        averageEffectiveReachRatio /= campaigns.size();
+      for (Campaign c : campaigns) {
+        Pair<Integer, Double> reachAndCost = this.computeEffectiveReachAndCost(day, agent, c);
+        double effectiveReachRatio = this.getEffectiveReachRatio(reachAndCost.getElement1(), c.getReach());
+        averageEffectiveReachRatio += effectiveReachRatio;
+        profit += effectiveReachRatio * c.getBudget() - reachAndCost.getElement2();
       }
+      averageEffectiveReachRatio /= campaigns.size();
       qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE * averageEffectiveReachRatio;
     }
-    return qualityScore;
+    return new Pair<Double, Double>(qualityScore, profit);
   }
 
   /**
-   * Computes profit for the given day and agent.
+   * Given a day, agent, and campaign, compute the effective reach attained by the campaign on the given day.
    * 
    * @param day
    * @param agent
-   * @return the agent's profit for the day. Might be negative.
+   * @param campaign
+   * @return the effective reach.
+   * @throws AdXException
    */
-  public Double computeCumulativeProfit(int day, String agent) {
-    List<Campaign> campaigns = this.agentsCampaings.get(day - 1, agent);
-    Map<Integer, Pair<Integer, Double>> statistics = this.summary.get(day, agent);
-    Double profit = this.getProfit(day - 1, agent);
-    if (statistics != null) {
-      for (Campaign c : campaigns) {
-        if (statistics.containsKey(c.getId())) {
-          Pair<Integer, Double> stat = statistics.get(c.getId());
-          profit += this.getEffectiveReach(stat.getElement1(), c.getReach()) * c.getBudget() - stat.getElement2();
+  public Pair<Integer, Double> computeEffectiveReachAndCost(int day, String agent, Campaign campaign) throws AdXException {
+    Table<Integer, Query, Pair<Integer, Double>> dailyStats = this.statistics.get(day, agent);
+    int effectiveReach = 0;
+    double cost = 0.0;
+    MarketSegment campaignsMarketSegment = campaign.getMarketSegment();
+    if (dailyStats != null) {
+      // The campaign won some impressions. Lets check if they match the campaign's market segment.
+      for (Entry<Query, Pair<Integer, Double>> queryStats : dailyStats.row(campaign.getId()).entrySet()) {
+        if (MarketSegment.marketSegmentSubset(campaignsMarketSegment, queryStats.getKey().getMarketSegment())) {
+          effectiveReach += queryStats.getValue().getElement1();
         }
+        cost += queryStats.getValue().getElement2();
       }
     }
-    return profit;
+    return new Pair<Integer, Double>(effectiveReach, cost);
+  }
+  
+  /**
+   * Returns a campaign given its id.
+   * 
+   * @param campaignId
+   * @return
+   */
+  public Campaign getCampaign(int campaignId) {
+    return this.campaigns.get(campaignId);
   }
 
   /**
@@ -181,7 +196,7 @@ public class Statistics {
    * @param budget
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
-  private double getEffectiveReach(double x, int reach) {
+  private double getEffectiveReachRatio(double x, int reach) {
     return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
   }
 
@@ -193,7 +208,7 @@ public class Statistics {
   public Double getQualityScore(int day, String agent) {
     return this.qualityScores.get(day, agent);
   }
-  
+
   /**
    * Getter.
    * 
@@ -232,6 +247,7 @@ public class Statistics {
       this.agentsCampaings.put(day, agentName, new ArrayList<Campaign>());
     }
     this.agentsCampaings.get(day, agentName).add(campaign);
+    this.campaigns.put(campaignId, campaign);
   }
 
   /**
@@ -241,7 +257,7 @@ public class Statistics {
    * @return true if the campaign has been registered, false otherwise.
    */
   public boolean campaignExists(int campaignId) {
-    return this.campaignsOwnership.containsKey(campaignId);
+    return this.campaignsOwnership.containsKey(campaignId) && this.campaigns.containsKey(campaignId);
   }
 
   /**
@@ -356,6 +372,22 @@ public class Statistics {
   public Map<Integer, Pair<Integer, Double>> getDailySummary(int day, String agent) {
     return this.summary.get(day, agent);
   }
+  
+  /**
+   * 
+   * @return
+   */
+  public String printNiceCampaignTable(){
+    String ret = "";
+    if (this.campaigns.entrySet().size() > 0) {
+      for (Entry<Integer, Campaign> x : this.campaigns.entrySet()) {
+        ret += "\n\t\t" + x.getKey() + " -> " + x.getValue();
+      }
+    } else {
+      ret += "Currently, no campaigns are registered";
+    }
+    return ret;
+  }
 
   /**
    * Printer.
@@ -376,7 +408,7 @@ public class Statistics {
     }
     return ret;
   }
-  
+
   /**
    * Printer.
    * 
@@ -419,7 +451,7 @@ public class Statistics {
    * 
    * @return a human readable representation of the campaign table.
    */
-  public String printNiceCampaignTable() {
+  public String printNiceAgentCampaignTable() {
     String ret = "";
     if (this.agentsCampaings.rowMap().entrySet().size() > 0) {
       for (Entry<Integer, Map<String, List<Campaign>>> x : this.agentsCampaings.rowMap().entrySet()) {

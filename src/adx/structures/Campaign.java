@@ -16,6 +16,16 @@ public class Campaign {
   protected final int id;
 
   /**
+   * The campaign starting day.
+   */
+  protected final int startDay;
+
+  /**
+   * The campaign ending day.
+   */
+  protected final int endDay;
+
+  /**
    * Campaign's market segment.
    */
   protected final MarketSegment marketSegment;
@@ -39,20 +49,28 @@ public class Campaign {
     this.marketSegment = null;
     this.reach = -1;
     this.budget = -1;
+    this.startDay = -1;
+    this.endDay = -1;
   }
 
   /**
    * Constructor.
    * 
-   * @param budget - this campaign's budget.
-   * @param reach - this campaign's reach.
-   * @throws AdXException in case either budget or reach are non-positive.
+   * @param budget
+   *          - this campaign's budget.
+   * @param reach
+   *          - this campaign's reach.
+   * @throws AdXException
+   *           in case either budget or reach are non-positive.
    */
-  public Campaign(int id, MarketSegment marketSegment, int reach) throws AdXException {
+  public Campaign(int id, int startDay, int endDay, MarketSegment marketSegment, int reach) throws AdXException {
     InputValidators.validateCampaignId(id);
     InputValidators.validateNotNull(marketSegment);
     InputValidators.validateCampaignReach(reach);
+    InputValidators.validateCampaignDuration(startDay, endDay);
     this.id = id;
+    this.startDay = startDay;
+    this.endDay = endDay;
     this.marketSegment = marketSegment;
     this.reach = reach;
   }
@@ -85,6 +103,24 @@ public class Campaign {
   /**
    * Getter.
    * 
+   * @return the campaign's starting day.
+   */
+  public int getStartDay() {
+    return this.startDay;
+  }
+
+  /**
+   * Getter.
+   * 
+   * @return the campaign's ending day.
+   */
+  public int getEndDay() {
+    return this.endDay;
+  }
+
+  /**
+   * Getter.
+   * 
    * @return the campaign's market segment.
    */
   public MarketSegment getMarketSegment() {
@@ -111,7 +147,8 @@ public class Campaign {
 
   @Override
   public String toString() {
-    return "Campaign " + this.id + " = [Segment = " + this.marketSegment + ", Reach = " + this.reach + ", Budget = " + this.budget + "]";
+    return "Campaign " + this.id + " = [startDay = " + this.startDay + ", endDay = " + this.endDay + ", Segment = " + this.marketSegment + ", Reach = "
+        + this.reach + ", Budget = " + this.budget + "]";
   }
 
 }

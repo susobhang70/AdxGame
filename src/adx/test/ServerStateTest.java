@@ -22,7 +22,7 @@ public class ServerStateTest {
     // Test the validation of the bid bundle, case where an agent reports a campaign it does not owns.
     ServerState serverState = new ServerState(0);
     serverState.initStatistics();
-    serverState.registerCampaign(new Campaign(1, MarketSegment.FEMALE, 1), "agent0");
+    serverState.registerCampaign(new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
     BidBundle bidBundle0 = new BidBundle(0, new HashSet<BidEntry>() {{add(new BidEntry(1, null, 0, 0));}}, null, null);
     serverState.validateBidBundle(0, bidBundle0, "wrong agent");
   }
@@ -33,7 +33,7 @@ public class ServerStateTest {
     // Test the validation of the bid bundle, case where an agent reports a campaign that does not exists.
     ServerState serverState = new ServerState(0);
     serverState.initStatistics();
-    serverState.registerCampaign(new Campaign(1, MarketSegment.FEMALE, 1), "agent0");
+    serverState.registerCampaign(new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
     BidBundle bidBundle0 = new BidBundle(0, new HashSet<BidEntry>() {{add(new BidEntry(10, null, 0, 0));}}, null, null);
     serverState.validateBidBundle(0, bidBundle0, "agent0");
   }
@@ -45,7 +45,7 @@ public class ServerStateTest {
     ServerState serverState = new ServerState(0);
     serverState.registerAgent("agent0");
     serverState.initStatistics();
-    serverState.registerCampaign(new Campaign(1, MarketSegment.FEMALE, 1), "agent0");
+    serverState.registerCampaign(new Campaign(1, 1 , 1, MarketSegment.FEMALE, 1), "agent0");
     BidBundle bidBundle0 = new BidBundle(1, new HashSet<BidEntry>() {{add(new BidEntry(1, new Query(), 0, 1));}}, null, null);
     try {
       serverState.validateBidBundle(1, bidBundle0, "agent0");
@@ -61,8 +61,8 @@ public class ServerStateTest {
     ServerState serverState = new ServerState(0);
     serverState.initStatistics();
     serverState.registerAgent("agent1");
-    serverState.registerCampaign(new Campaign(208, MarketSegment.FEMALE, 1), "agent1");
-    serverState.registerCampaign(new Campaign(350, MarketSegment.FEMALE, 1), "agent1");
+    serverState.registerCampaign(new Campaign(208, 1, 1, MarketSegment.FEMALE, 1), "agent1");
+    serverState.registerCampaign(new Campaign(350, 1, 1, MarketSegment.FEMALE, 1), "agent1");
     BidBundle bidBundle0 = new BidBundle(1, new HashSet<BidEntry>() {{
       add(new BidEntry(208, new Query(), 0, 1));
       add(new BidEntry(208, new Query(), 0, 1));
@@ -78,8 +78,8 @@ public class ServerStateTest {
   public void testOverlappingRegistration() throws AdXException {
     ServerState serverState = new ServerState(0);
     serverState.initStatistics();
-    serverState.registerCampaign(new Campaign(1, MarketSegment.FEMALE, 1), "agent0");
-    serverState.registerCampaign(new Campaign(1, MarketSegment.FEMALE, 1), "agent0");
+    serverState.registerCampaign(new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    serverState.registerCampaign(new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
   }
   
 }
