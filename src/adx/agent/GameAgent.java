@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import adx.exceptions.AdXException;
@@ -15,6 +16,8 @@ import adx.structures.BidEntry;
 import adx.structures.Campaign;
 import adx.structures.Query;
 import adx.util.Logging;
+import adx.util.Pair;
+import adx.util.Printer;
 
 /**
  * This class represents a simple agent for the game.
@@ -43,6 +46,11 @@ public class GameAgent extends Agent {
   protected Double currentQualityScore;
 
   /**
+   * Keeps the statistics.
+   */
+  protected Map<Integer, Pair<Integer, Double>> statistics;
+
+  /**
    * Empty constructor. For testing purposes only.
    */
   public GameAgent() {
@@ -52,8 +60,10 @@ public class GameAgent extends Agent {
   /**
    * Constructor.
    * 
-   * @param host - on which the agent will try to connect.
-   * @param port - the agent will use for the connection.
+   * @param host
+   *          - on which the agent will try to connect.
+   * @param port
+   *          - the agent will use for the connection.
    */
   public GameAgent(String host, int port) {
     super(host, port);
@@ -62,6 +72,7 @@ public class GameAgent extends Agent {
 
   public void init() {
     this.myCampaigns = new ArrayList<Campaign>();
+    this.statistics = new HashMap<Integer, Pair<Integer, Double>>();
   }
 
   /**
@@ -73,10 +84,32 @@ public class GameAgent extends Agent {
     List<Campaign> activeCampaigns = new ArrayList<Campaign>();
     for (Campaign c : this.myCampaigns) {
       if (this.currentDay >= c.getStartDay() && this.currentDay <= c.getEndDay()) {
-        activeCampaigns.add(c);
+        if(!this.statistics.containsKey(c.getId()) || (this.statistics.containsKey(c.getId()) && this.statistics.get(c.getId()).getElement1() < c.getReach())) {
+          activeCampaigns.add(c);
+        }
       }
     }
     return activeCampaigns;
+  }
+
+  /**
+   * Update statistics from server.
+   * 
+   * @param statistics
+   */
+  public void updateStatistics(Map<Integer, Pair<Integer, Double>> statistics) {
+    if (statistics != null) {
+      for (Entry<Integer, Pair<Integer, Double>> x : statistics.entrySet()) {
+        if (this.statistics.containsKey(x.getKey())) {
+          Pair<Integer, Double> currentStats = this.statistics.get(x.getKey());
+          Pair<Integer, Double> newStats = new Pair<Integer, Double>(currentStats.getElement1() + x.getValue().getElement1(), currentStats.getElement2()
+              + x.getValue().getElement2());
+          this.statistics.put(x.getKey(), newStats);
+        } else {
+          this.statistics.put(x.getKey(), x.getValue());
+        }
+      }
+    }
   }
 
   /**
@@ -88,6 +121,7 @@ public class GameAgent extends Agent {
     Logging.log("[-] Current time = " + Instant.now());
     try {
       this.currentDay = endOfDayMessage.getDay();
+      this.updateStatistics(endOfDayMessage.getStatistics());
       this.campaignOpportunity = endOfDayMessage.getCampaignsForAuction();
       if (endOfDayMessage.getCampaignsWon() != null) {
         this.myCampaigns.addAll(endOfDayMessage.getCampaignsWon());
@@ -100,6 +134,8 @@ public class GameAgent extends Agent {
     } catch (AdXException e) {
       Logging.log("[x] Something went wrong getting the bid bundle for day " + endOfDayMessage.getDay() + " -> " + e.getMessage());
     }
+    Logging.log("[-] All my campaigns: " + Printer.printNiceListMyCampaigns(this.myCampaigns));
+    Logging.log("[-] Statistics: " + this.statistics);
   }
 
   /**
@@ -135,10 +171,10 @@ public class GameAgent extends Agent {
     List<Campaign> myActiveCampaigns = this.getActiveCampaigns();
     if (myActiveCampaigns != null && myActiveCampaigns.size() > 0) {
       Logging.log("[-] Preparing and sending Ad Bid for day " + this.currentDay);
-      Logging.log("[-] Active campaigns are: " + myActiveCampaigns);
+      Logging.log("[-] Active campaigns are: " + Printer.printNiceListMyCampaigns(myActiveCampaigns));
       for (Campaign c : myActiveCampaigns) {
-        BidEntry bidEntry = new BidEntry(c.getId(), new Query(c.getMarketSegment()), c.getBudget() / c.getReach(), c.getBudget());
-        bidEntries.add(bidEntry);
+        // bidEntries.add(new BidEntry(c.getId(), new Query(c.getMarketSegment()), c.getBudget() / c.getReach(), c.getBudget()));
+        bidEntries.add(new BidEntry(c.getId(), new Query(c.getMarketSegment()), 0.0, c.getBudget()));
         limits.put(c.getId(), c.getBudget());
       }
     } else {
@@ -157,20 +193,9 @@ public class GameAgent extends Agent {
     agent.connect("agent0", "123456");
   }
 
-  public String printNiceListMyCampaigns() {
-    String ret = "";
-    if (this.myCampaigns.size() > 0) {
-      for (Campaign c : this.myCampaigns) {
-        ret += "\n\t\t" + c;
-      }
-    } else {
-      ret += "No campaigns registered for this agent.";
-    }
-    return ret;
-  }
-
+  @Override
   public String toString() {
-    return "Agent: " + this.agentName + "\n\tMy Campaigns: " + this.printNiceListMyCampaigns();
+    return "Agent: " + this.agentName + "\n\tMy Campaigns: " + Printer.printNiceListMyCampaigns(this.myCampaigns);
   }
 
 }

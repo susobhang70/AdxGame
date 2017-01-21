@@ -20,7 +20,7 @@ public class BidBundleTest {
 
   @SuppressWarnings("serial")
   public static BidBundle getBidBundle0() throws AdXException {
-    return new BidBundle(0, new HashSet<BidEntry>() {
+    return new BidBundle(1, new HashSet<BidEntry>() {
       {
         add(new BidEntry(1, new Query(MarketSegment.FEMALE), 12.0, 120.0));
         add(new BidEntry(1, new Query(MarketSegment.MALE), 21.0, 210.0));
@@ -40,7 +40,7 @@ public class BidBundleTest {
 
   @SuppressWarnings("serial")
   public static BidBundle getBidBundle1() throws AdXException {
-    return new BidBundle(0, new HashSet<BidEntry>() {
+    return new BidBundle(1, new HashSet<BidEntry>() {
       {
         add(new BidEntry(2, new Query(MarketSegment.FEMALE_HIGH_INCOME), 600, 1220.0));
       }
@@ -58,7 +58,7 @@ public class BidBundleTest {
 
   @SuppressWarnings("serial")
   public static BidBundle getBidBundle2() throws AdXException {
-    return new BidBundle(0, new HashSet<BidEntry>() {
+    return new BidBundle(1, new HashSet<BidEntry>() {
       {
         add(new BidEntry(3, new Query(MarketSegment.YOUNG), 600, 31220.0));
       }
@@ -71,7 +71,7 @@ public class BidBundleTest {
 
   @SuppressWarnings("serial")
   public static BidBundle getBidBundle3() throws AdXException {
-    return new BidBundle(0, new HashSet<BidEntry>() {
+    return new BidBundle(1, new HashSet<BidEntry>() {
       {
         add(new BidEntry(4, new Query(MarketSegment.YOUNG), 600, 31220.0));
         add(new BidEntry(4, new Query(MarketSegment.MALE_YOUNG), 312.2, 31220.0));

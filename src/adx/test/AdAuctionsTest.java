@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import statistics.Statistics;
 import adx.auctions.AdAuctions;
-import adx.auctions.Statistics;
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
@@ -48,9 +48,9 @@ public class AdAuctionsTest {
     Map<Integer, Double> limits = new HashMap<Integer, Double>();
     limits.put(3, 3250.0);
     Query query = new Query(MarketSegment.MALE_YOUNG_HIGH_INCOME);
-    statistics.registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
-    statistics.registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
-    AdAuctions.runSecondPriceAuction(0, query, 10, filteredBids, limits, statistics);
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
+    AdAuctions.runSecondPriceAuction(1, query, 10, filteredBids, limits, statistics);
   }
 
   @Test
@@ -87,18 +87,18 @@ public class AdAuctionsTest {
     bids.add(new Pair<String, BidEntry>("agent0", new BidEntry(1, query, 1, 1)));
 
     Statistics statistics = StatisticsTest.getStatistics();
-    statistics.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    AdAuctions.runSecondPriceAuction(0, query, 10, bids, limits, statistics);
-    assertEquals(statistics.getStatistic(0, "agent0", 1, query).getElement1(), new Integer(10));
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    AdAuctions.runSecondPriceAuction(1, query, 10, bids, limits, statistics);
+    assertEquals(statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1(), new Integer(10));
 
     bids.add(new Pair<String, BidEntry>("agent0", new BidEntry(1, query, 1, 1)));
     bids.add(new Pair<String, BidEntry>("agent1", new BidEntry(2, query, 1, 1)));
 
     Statistics statistics1 = StatisticsTest.getStatistics();
-    statistics1.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    statistics1.registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
-    AdAuctions.runSecondPriceAuction(0, query, 10, bids, limits, statistics1);
-    assertTrue(statistics1.getStatistic(0, "agent0", 1, query).getElement1() == 1 || statistics1.getStatistic(0, "agent0", 1, query).getElement1() == 9);
+    statistics1.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics1.getStatisticsCampaign().registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
+    AdAuctions.runSecondPriceAuction(1, query, 10, bids, limits, statistics1);
+    assertTrue(statistics1.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1() == 1 || statistics1.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1() == 9);
 
     bids.add(new Pair<String, BidEntry>("agent0", new BidEntry(1, query, 100, 10)));
     bids.add(new Pair<String, BidEntry>("agent1", new BidEntry(2, query, 200, 10)));
@@ -106,10 +106,10 @@ public class AdAuctionsTest {
     bids.add(new Pair<String, BidEntry>("agent3", new BidEntry(4, query, 400, 3000)));
 
     Statistics statistics2 = StatisticsTest.getStatistics();
-    statistics2.registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
-    AdAuctions.runSecondPriceAuction(0, query, 10, bids, limits, statistics2);
-    assertEquals(statistics2.getStatistic(0, "agent3", 4, query).getElement1(), new Integer(10));
-    assertEquals(statistics2.getStatistic(0, "agent3", 4, query).getElement2(), new Double(3000.0));
+    statistics2.getStatisticsCampaign().registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
+    AdAuctions.runSecondPriceAuction(1, query, 10, bids, limits, statistics2);
+    assertEquals(statistics2.getStatisticsAds().getDailyStatistic(1, "agent3", 4, query).getElement1(), new Integer(10));
+    assertEquals(statistics2.getStatisticsAds().getDailyStatistic(1, "agent3", 4, query).getElement2(), new Double(3000.0));
 
     // Testing query limits, as well as daily limits.
     bids = new ArrayList<Pair<String, BidEntry>>();
@@ -119,14 +119,14 @@ public class AdAuctionsTest {
     bids.add(new Pair<String, BidEntry>("agent3", new BidEntry(4, query, 400, 3000)));
 
     Statistics statistics3 = StatisticsTest.getStatistics();
-    statistics3.registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
-    statistics3.registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
+    statistics3.getStatisticsCampaign().registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
+    statistics3.getStatisticsCampaign().registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
     limits.put(4, 300.5);
-    AdAuctions.runSecondPriceAuction(0, query, 10, bids, limits, statistics3);
-    assertEquals(statistics3.getStatistic(0, "agent3", 4, query).getElement1(), new Integer(1));
-    assertEquals(statistics3.getStatistic(0, "agent3", 4, query).getElement2(), new Double(300.0));
-    assertEquals(statistics3.getStatistic(0, "agent2", 3, query).getElement1(), new Integer(9));
-    assertEquals(statistics3.getStatistic(0, "agent2", 3, query).getElement2(), new Double(1800.0));
+    AdAuctions.runSecondPriceAuction(1, query, 10, bids, limits, statistics3);
+    assertEquals(statistics3.getStatisticsAds().getDailyStatistic(1, "agent3", 4, query).getElement1(), new Integer(1));
+    assertEquals(statistics3.getStatisticsAds().getDailyStatistic(1, "agent3", 4, query).getElement2(), new Double(300.0));
+    assertEquals(statistics3.getStatisticsAds().getDailyStatistic(1, "agent2", 3, query).getElement1(), new Integer(9));
+    assertEquals(statistics3.getStatisticsAds().getDailyStatistic(1, "agent2", 3, query).getElement2(), new Double(1800.0));
   }
 
   @Test
@@ -188,12 +188,12 @@ public class AdAuctionsTest {
     bids.add(new Pair<String, BidEntry>("agent1", new BidEntry(2, query, 50, Double.MAX_VALUE)));
 
     Statistics statistics = StatisticsTest.getStatistics();
-    statistics.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    statistics.registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
-    AdAuctions.runSecondPriceAuction(0, query, supply, bids, new HashMap<Integer, Double>(), statistics);
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
+    AdAuctions.runSecondPriceAuction(1, query, supply, bids, new HashMap<Integer, Double>(), statistics);
 
-    assertTrue(statistics.getSummaryStatistic(0, "agent1", 2).getElement1() > 0);
-    assertTrue(statistics.getSummaryStatistic(0, "agent0", 1).getElement1() == 0 || statistics.getSummaryStatistic(0, "agent0", 1).getElement1() == 1);
+    assertTrue(statistics.getStatisticsAds().getDailySummaryStatistic(1, "agent1", 2).getElement1() > 0);
+    assertTrue(statistics.getStatisticsAds().getDailySummaryStatistic(1, "agent0", 1).getElement1() == 0 || statistics.getStatisticsAds().getDailySummaryStatistic(1, "agent0", 1).getElement1() == 1);
     // Logging.log(adStatistics);
   }
 
@@ -206,22 +206,22 @@ public class AdAuctionsTest {
     bids.add(new Pair<String, BidEntry>("agent1", new BidEntry(2, query, 40, Double.MAX_VALUE)));
 
     Statistics statistics = StatisticsTest.getStatistics();
-    statistics.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    statistics.registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent0");
     
-    AdAuctions.runSecondPriceAuction(0, query, supply, bids, new HashMap<Integer, Double>(), statistics);
-    assertEquals(statistics.getStatistic(0, "agent0", 1, query).getElement1(), new Integer(100));
-    assertEquals(statistics.getStatistic(0, "agent0", 1, query).getElement2(), new Double(4000.0));
+    AdAuctions.runSecondPriceAuction(1, query, supply, bids, new HashMap<Integer, Double>(), statistics);
+    assertEquals(statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1(), new Integer(100));
+    assertEquals(statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement2(), new Double(4000.0));
 
     Query query2 = new Query(MarketSegment.FEMALE);
     int supply2 = 213;
     List<Pair<String, BidEntry>> bids2 = new ArrayList<Pair<String, BidEntry>>();
     bids2.add(new Pair<String, BidEntry>("agent0", new BidEntry(1, query, 50, Double.MAX_VALUE)));
     bids2.add(new Pair<String, BidEntry>("agent1", new BidEntry(2, query, 40, Double.MAX_VALUE)));
-    AdAuctions.runSecondPriceAuction(0, query2, supply2, bids2, new HashMap<Integer, Double>(), statistics);
+    AdAuctions.runSecondPriceAuction(1, query2, supply2, bids2, new HashMap<Integer, Double>(), statistics);
 
-    assertEquals(statistics.getStatistic(0, "agent0", 1, query).getElement1(), new Integer(313));
-    assertEquals(statistics.getStatistic(0, "agent0", 1, query).getElement2(), new Double(12520.0));
+    assertEquals(statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1(), new Integer(313));
+    assertEquals(statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement2(), new Double(12520.0));
 
   }
   
@@ -238,11 +238,11 @@ public class AdAuctionsTest {
     limits.put(2, 1882.0);
     
     Statistics statistics = StatisticsTest.getStatistics();
-    statistics.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    statistics.registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
-    AdAuctions.runSecondPriceAuction(0, query, supply, bids, limits, statistics);
-    assertTrue((statistics.getStatistic(0, "agent0", 1, query).getElement2() / statistics.getStatistic(0, "agent0", 1, query).getElement1()) == 1.0);
-    assertTrue((statistics.getStatistic(0, "agent1", 2, query).getElement2() / statistics.getStatistic(0, "agent1", 2, query).getElement1()) == 1.0);
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
+    AdAuctions.runSecondPriceAuction(1, query, supply, bids, limits, statistics);
+    assertTrue((statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement2() / statistics.getStatisticsAds().getDailyStatistic(1, "agent0", 1, query).getElement1()) == 1.0);
+    assertTrue((statistics.getStatisticsAds().getDailyStatistic(1, "agent1", 2, query).getElement2() / statistics.getStatisticsAds().getDailyStatistic(1, "agent1", 2, query).getElement1()) == 1.0);
   }
 
   @Test
@@ -254,12 +254,12 @@ public class AdAuctionsTest {
     bidBundles.put("agent3", BidBundleTest.getBidBundle3());
     // Logging.log(bidBundles);
     Statistics statistics = StatisticsTest.getStatistics();
-    statistics.registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
-    statistics.registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
-    statistics.registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
-    statistics.registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(1, 1, 1, MarketSegment.FEMALE, 1), "agent0");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(2, 1, 1, MarketSegment.FEMALE, 1), "agent1");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(3, 1, 1, MarketSegment.FEMALE, 1), "agent2");
+    statistics.getStatisticsCampaign().registerCampaign(0, new Campaign(4, 1, 1, MarketSegment.FEMALE, 1), "agent3");
 
-    AdAuctions.runAllAuctions(0, bidBundles, statistics);
+    AdAuctions.runAllAuctions(1, bidBundles, statistics);
     // Logging.log(adStatistics);
   }
 

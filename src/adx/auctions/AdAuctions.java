@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import statistics.Statistics;
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
@@ -106,13 +107,13 @@ public class AdAuctions {
     String winnerName = winnerList.get(0).getElement1();
     Double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
     Double totalSpendSoFar = 0.0;
-    if(adStatistics.getSummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()) != null) {
-      totalSpendSoFar = adStatistics.getSummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2();
+    if(adStatistics.getStatisticsAds().getDailySummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()) != null) {
+      totalSpendSoFar = adStatistics.getStatisticsAds().getDailySummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2();
     }
-    Double querySpendSoFar = adStatistics.getStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query).getElement2();
+    Double querySpendSoFar = adStatistics.getStatisticsAds().getDailyStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query).getElement2();
     if (totalSpendSoFar + winCost <= dailyLimit && querySpendSoFar + winCost <= winnerBidEntry.getLimit()) {
       // This guy is allowed to take one more, allocate one more to him.
-      adStatistics.addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, 1, winCost);
+      adStatistics.getStatisticsAds().addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, 1, winCost);
       // Can this guy still be on the auction? We know that winCost will be the winCost for this guy in the future
       // So we can just check if he can buy one more
       if (totalSpendSoFar + 2 * winCost > dailyLimit || querySpendSoFar + 2 * winCost > winnerBidEntry.getLimit()) {
@@ -155,7 +156,7 @@ public class AdAuctions {
       double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
       // We can either take the whole supply or as much as allowed by our limits (up to flooring numbers)
       double limitSpend = Math.min(supply * winnerCost,
-          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getSummaryStatistic(0, winnerName, winnerBidEntry.getCampaignId()).getElement2()));
+          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getStatisticsAds().getDailySummaryStatistic(0, winnerName, winnerBidEntry.getCampaignId()).getElement2()));
       winCount = (int) Math.floor(limitSpend / winnerCost);
       winCost = winCount * winnerCost;
     } else {
@@ -166,7 +167,7 @@ public class AdAuctions {
     //Logging.log("day = " + day + ", winnerName = " + winnerName + ", id = " + winnerBidEntry.getCampaignId() + ", query = " + query + ", winCount = " +
     // winCount + ", winCost = " + winCost);
     // Add the statistics about what this campaign won.
-    adStatistics.addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, winCount, winCost);
+    adStatistics.getStatisticsAds().addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, winCount, winCost);
     return winCount;
   }
 

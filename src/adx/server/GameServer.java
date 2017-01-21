@@ -87,7 +87,7 @@ public class GameServer extends GameServerAbstract {
         Campaign c = Sampling.sampleInitialCampaign();
         this.serverState.registerCampaign(c, agent);
       } catch (AdXException e) {
-        Logging.log("Error trying to sample an initial campaign.");
+        Logging.log("[x] Error trying to sample an initial campaign.");
         e.printStackTrace();
       }
     }
@@ -108,9 +108,13 @@ public class GameServer extends GameServerAbstract {
     }
     for (Entry<String, Connection> agent : this.namesToConnections.entrySet()) {
       String agentName = agent.getKey();
-      agent.getValue().sendTCP(
-          new EndOfDayMessage(this.serverState.getCurrentDay() + 1, timeEndOfDay.toString(), this.serverState.getSummaryStatistic(agentName), listOfCampaigns,
-              this.serverState.getWonCampaigns(agentName), this.serverState.getQualitScore(agentName), this.serverState.getProfit(agentName)));
+      try {
+        agent.getValue().sendTCP(
+            new EndOfDayMessage(this.serverState.getCurrentDay() + 1, timeEndOfDay.toString(), this.serverState.getDailySummaryStatistic(agentName), listOfCampaigns,
+                this.serverState.getWonCampaigns(agentName), this.serverState.getQualitScore(agentName), this.serverState.getProfit(agentName)));
+      } catch (AdXException e) {
+        Logging.log("[x] Error sending the end of day message -> " + e);
+      }
     }
   }
 

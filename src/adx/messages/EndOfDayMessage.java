@@ -5,6 +5,7 @@ import java.util.Map;
 
 import adx.structures.Campaign;
 import adx.util.Pair;
+import adx.util.Printer;
 
 /**
  * This message is used to inform the agents about the exact server time when bids for the day are no longer accepted.
@@ -145,7 +146,8 @@ public class EndOfDayMessage {
   @Override
   public String toString() {
     return "\n\t EndOfDayMessage: \n\t\t Day: " + this.day + ", \n\t\t Time: " + this.endOfDayTime + ",\n\t\t Statistics: " + this.statistics
-        + ", \n\t\t Campaigns up for auction: " + this.auctionedCampaings + ", \n\t\t Won campaigns: " + this.wonCampaings + "\n\t\t Quality Score = "
-        + this.qualityScore + "\n\t\t Cumulative Profit: " + this.cumulativeProfit;
+        + ", \n\t\t Campaigns up for auction: " + Printer.printNiceListMyCampaigns(auctionedCampaings) + ", \n\t\t Won campaigns: "
+        + Printer.printNiceListMyCampaigns(this.wonCampaings) + "\n\t\t Quality Score = " + this.qualityScore + "\n\t\t Cumulative Profit: "
+        + this.cumulativeProfit;
   }
 }

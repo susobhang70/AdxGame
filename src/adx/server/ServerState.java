@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import statistics.Statistics;
 import adx.auctions.AdAuctions;
-import adx.auctions.Statistics;
 import adx.auctions.CampaignAuctions;
 import adx.exceptions.AdXException;
 import adx.structures.BidBundle;
@@ -98,24 +98,6 @@ public class ServerState {
   }
 
   /**
-   * Add a bid bundle.
-   * 
-   * @param day
-   * @param agent
-   * @param bidBundle
-   */
-  public Pair<Boolean, String> addBidBundle(int day, String agent, BidBundle bidBundle) {
-    try {
-      this.validateBidBundle(day, bidBundle, agent);
-      Logging.log("[-] Bid bundle on day " + day + " for agent " + agent + ", accepted.");
-      this.bidBundles.put(day, agent, bidBundle);
-    } catch (AdXException e) {
-      return new Pair<Boolean, String>(false, e.getMessage());
-    }
-    return new Pair<Boolean, String>(true, "OK");
-  }
-
-  /**
    * Getter.
    * 
    * @return the time, in nanoseconds, the game started.
@@ -131,6 +113,49 @@ public class ServerState {
    */
   public int getCurrentDay() {
     return this.currentDay;
+  }
+
+  /**
+   * Gets the agent's current quality score.
+   * 
+   * @param agent
+   * @return
+   * @throws AdXException 
+   */
+  public Double getQualitScore(String agent) throws AdXException {
+    return this.statistics.getQualityScore(this.currentDay, agent);
+  }
+
+  /**
+   * Gets the agent's current profit.
+   * 
+   * @param agent
+   * @return
+   * @throws AdXException 
+   */
+  public Double getProfit(String agent) throws AdXException {
+    return this.statistics.getProfit(this.currentDay, agent);
+  }
+
+  /**
+   * Given an agent, returns a list of all campaigns won by the agent in the current day.
+   * 
+   * @param agent
+   * @return
+   */
+  public List<Campaign> getWonCampaigns(String agent) {
+    return this.statistics.getStatisticsCampaign().getWonCampaigns(this.currentDay, agent);
+  }
+
+  /**
+   * Returns the daily summary statistics.
+   * 
+   * @param day
+   * @param agent
+   * @return
+   */
+  public Map<Integer, Pair<Integer, Double>> getDailySummaryStatistic(String agent) {
+    return this.statistics.getStatisticsAds().getDailySummaryStatistic(this.currentDay, agent);
   }
 
   /**
@@ -154,18 +179,43 @@ public class ServerState {
    * Registers a campaign.
    * 
    * @param campaign
-   *          - a campaign
    * @param agent
-   *          - the agent
    * @throws AdXException
    */
   public void registerCampaign(Campaign campaign, String agentName) throws AdXException {
-    this.statistics.registerCampaign(this.currentDay, campaign, agentName);
+    this.statistics.getStatisticsCampaign().registerCampaign(this.currentDay, campaign, agentName);
+  }
+  
+  /**
+   * Updates quality scores.
+   * 
+   * @param day
+   * @throws AdXException
+   */
+  public void updateDailyStatistics() throws AdXException {
+    this.statistics.updateDailyStatistics(this.currentDay);
   }
 
   /**
-   * Validates a bid bundle. This means check if: (1) the campaigns in a bid bundle actually belong to the given agent. (2) the limit on a query is at least the
-   * bid.
+   * Add a bid bundle.
+   * 
+   * @param day
+   * @param agent
+   * @param bidBundle
+   */
+  public Pair<Boolean, String> addBidBundle(int day, String agent, BidBundle bidBundle) {
+    try {
+      this.validateBidBundle(day, bidBundle, agent);
+      Logging.log("[-] Bid bundle on day " + day + " for agent " + agent + ", accepted.");
+      this.bidBundles.put(day, agent, bidBundle);
+    } catch (AdXException e) {
+      return new Pair<Boolean, String>(false, e.getMessage());
+    }
+    return new Pair<Boolean, String>(true, "OK");
+  }
+
+  /**
+   * Validates a bid bundle.
    * 
    * @param bidBundle
    * @param agent
@@ -178,36 +228,25 @@ public class ServerState {
     }
     for (BidEntry bidEntry : bidBundle.getBidEntries()) {
       int campaignId = bidEntry.getCampaignId();
-      if (!this.statistics.campaignExists(campaignId)) {
-        Logging.log(bidBundle);
-        Logging.log(bidEntry);
+      if (!this.statistics.getStatisticsCampaign().campaignExists(campaignId)) {
         throw new AdXException("The entry " + bidEntry + " refers to a non-existing campaign.");
-      } else if (!this.statistics.isOwner(campaignId, agent)) {
+      } else if (!this.statistics.getStatisticsCampaign().isOwner(campaignId, agent)) {
         throw new AdXException("The entry " + bidEntry + " refers to a campaign not owned by the agent.");
       } else if (bidEntry.getQuery() == null) {
         throw new AdXException("The entry " + bidEntry + " refers to a null query.");
       } else if (bidEntry.getLimit() < bidEntry.getBid()) {
         throw new AdXException("The entry " + bidEntry + " limit is less than the bid.");
       } else {
-        Campaign c = this.statistics.getCampaign(campaignId);
+        Campaign c = this.statistics.getStatisticsCampaign().getCampaign(campaignId);
         if (c.getStartDay() > day) {
-          throw new AdXException("The entry" + bidEntry + " refers to campaign that hasn't started yet: " + this.statistics.getCampaign(campaignId));
-        } else if(c.getEndDay() < day) {
-          throw new AdXException("The entry" + bidEntry + " refers to campaign that already ended: " + this.statistics.getCampaign(campaignId));
+          throw new AdXException("The entry" + bidEntry + " refers to campaign that hasn't started yet: "
+              + this.statistics.getStatisticsCampaign().getCampaign(campaignId));
+        } else if (c.getEndDay() < day) {
+          throw new AdXException("The entry" + bidEntry + " refers to campaign that already ended: "
+              + this.statistics.getStatisticsCampaign().getCampaign(campaignId));
         }
       }
     }
-  }
-
-  /**
-   * Runs all the ad auctions.
-   * 
-   * @throws AdXException
-   */
-  public void runAdAuctions() throws AdXException {
-    Logging.log("[-] Try to run ad auctions for day: " + this.currentDay);
-    AdAuctions.runAllAuctions(this.currentDay, this.bidBundles.row(this.currentDay), this.statistics);
-    Logging.log("[-] Done running ad auctions for day: " + this.currentDay);
   }
 
   /**
@@ -242,7 +281,7 @@ public class ServerState {
         Pair<String, Double> winner = CampaignAuctions.runCampaignAuction(filteredBids);
         // Logging.log("\t\t\t [-] Winner!!! = " + winner.getElement1());
         this.registerCampaign(campaign, winner.getElement1());
-        if(winner.getElement2() == Double.MAX_VALUE) {
+        if (winner.getElement2() == Double.MAX_VALUE) {
           campaign.setBudget(campaign.getReach());
         } else {
           campaign.setBudget(winner.getElement2());
@@ -251,56 +290,16 @@ public class ServerState {
     }
     Logging.log("[-] Done running campaign auction for day " + this.currentDay);
   }
-
+  
   /**
-   * Updates quality scores.
+   * Runs all the ad auctions.
    * 
-   * @param day
    * @throws AdXException
    */
-  public void updateDailyStatistics() throws AdXException {
-    this.statistics.updateDailyStatistics(this.currentDay);
-  }
-  
-  /**
-   * Gets the agent's current quality score.
-   * 
-   * @param agent
-   * @return
-   */
-  public Double getQualitScore(String agent) {
-    return this.statistics.getQualityScore(this.currentDay, agent);
-  }
-  
-  /**
-   * Gets the agent's current profit.
-   * 
-   * @param agent
-   * @return
-   */
-  public Double getProfit(String agent) {
-    return this.statistics.getProfit(this.currentDay, agent);
-  }
-
-  /**
-   * Given an agent, returns a list of all campaigns won by the agent in the current day.
-   * 
-   * @param agent
-   * @return
-   */
-  public List<Campaign> getWonCampaigns(String agent) {
-    return this.statistics.getWonCampaigns(this.currentDay, agent);
-  }
-
-  /**
-   * Returns the daily summary statistics.
-   * 
-   * @param day
-   * @param agent
-   * @return
-   */
-  public Map<Integer, Pair<Integer, Double>> getSummaryStatistic(String agent) {
-    return this.statistics.getDailySummary(this.currentDay, agent);
+  public void runAdAuctions() throws AdXException {
+    Logging.log("[-] Try to run ad auctions for day: " + this.currentDay);
+    AdAuctions.runAllAuctions(this.currentDay, this.bidBundles.row(this.currentDay), this.statistics);
+    Logging.log("[-] Done running ad auctions for day: " + this.currentDay);
   }
 
   /**
@@ -327,20 +326,18 @@ public class ServerState {
    * A light string representation for debugging purposes.
    */
   public void printServerState() {
-    Logging.log("[-] Server State: \n\t Game Id = " + this.gameId  +
-        "\n\t Day: " + this.currentDay + 
-        "\n\t EndOfDay: " + ((this.currentDayEnd != null) ? this.currentDayEnd.toString() : "" ) +
-        "\n\t Agents Names: " + this.agentsNames + 
-        "\n\t Campaings Ownership: " + this.statistics.printNiceCampaignOwnership() + 
-        "\n\t Campaings: " + this.statistics.printNiceCampaignTable() + 
-        "\n\t Map of Campaigns: " + this.statistics.printNiceAgentCampaignTable() +
-        //"\n\t BidBundles = " + this.bidBundles +
-        "\n\t Campaign For Auction: " + this.printNiceCampaignForAuctionList()
-        );
+    Logging.log("[-] Server State: \n\t Game Id = " + this.gameId + "\n\t Day: " + this.currentDay + "\n\t EndOfDay: "
+        + ((this.currentDayEnd != null) ? this.currentDayEnd.toString() : "") + "\n\t Agents Names: " + this.agentsNames + "\n\t Campaings Ownership: "
+        + this.statistics.getStatisticsCampaign().printNiceCampaignOwnership() + "\n\t Campaings: "
+        + this.statistics.getStatisticsCampaign().printNiceCampaignTable() + "\n\t Map of Campaigns: "
+        + this.statistics.getStatisticsCampaign().printNiceAgentCampaignTable() +
+        // "\n\t BidBundles = " + this.bidBundles +
+        "\n\t Campaign For Auction: " + this.printNiceCampaignForAuctionList());
     if (this.statistics != null)
-      Logging.log("\t Ad Statistics: " + this.statistics.printNiceAdStatisticsTable());
+      Logging.log("\t Ad Statistics: " + this.statistics.getStatisticsAds().printNiceAdStatisticsTable());
     Logging.log("\t Quality Scores: " + this.statistics.printNiceQualityScoresTable());
     Logging.log("\t Profit: " + this.statistics.printNiceProfitScoresTable());
+    Logging.log("\t Summary: " + this.statistics.getStatisticsAds().printNiceSummaryTable());
   }
 
 }
