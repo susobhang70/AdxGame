@@ -63,6 +63,19 @@ public class BidBundle {
   }
 
   /**
+   * Constructor for a bidbundle to play only one day games.
+   * 
+   * @param bidEntries
+   * @param campaignsLimits
+   */
+  public BidBundle(Set<BidEntry> bidEntries, Map<Integer, Double> campaignsLimits) {
+    this.day = 1;
+    this.campaignsBid = null;
+    this.bidEntries = bidEntries;
+    this.campaignsLimits = campaignsLimits;
+  }
+
+  /**
    * Getter.
    * 
    * @return the simulated day for which this bid bundle was constructed.

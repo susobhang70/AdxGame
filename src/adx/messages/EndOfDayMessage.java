@@ -32,12 +32,12 @@ public class EndOfDayMessage {
   /**
    * A list of campaigns being up for auction.
    */
-  private final List<Campaign> auctionedCampaings;
+  private final List<Campaign> auctionedCampaigns;
 
   /**
    * A list of campaigns the agent won.
    */
-  private final List<Campaign> wonCampaings;
+  private final List<Campaign> wonCampaigns;
 
   /**
    * The current quality score.
@@ -57,8 +57,8 @@ public class EndOfDayMessage {
     this.day = -1;
     this.endOfDayTime = null;
     this.statistics = null;
-    this.auctionedCampaings = null;
-    this.wonCampaings = null;
+    this.auctionedCampaigns = null;
+    this.wonCampaigns = null;
     this.qualityScore = -1;
     this.cumulativeProfit = -1;
   }
@@ -74,8 +74,8 @@ public class EndOfDayMessage {
     this.day = day;
     this.endOfDayTime = endOfDayTime;
     this.statistics = statistics;
-    this.auctionedCampaings = auctionedCampaings;
-    this.wonCampaings = wonCampaings;
+    this.auctionedCampaigns = auctionedCampaings;
+    this.wonCampaigns = wonCampaings;
     this.qualityScore = qualityScore;
     this.cumulativeProfit = cumulativeProfit;
   }
@@ -104,7 +104,7 @@ public class EndOfDayMessage {
    * @return the list of campaigns up for auction.
    */
   public List<Campaign> getCampaignsForAuction() {
-    return this.auctionedCampaings;
+    return this.auctionedCampaigns;
   }
 
   /**
@@ -113,7 +113,7 @@ public class EndOfDayMessage {
    * @return the list of campaigns won by the agent.
    */
   public List<Campaign> getCampaignsWon() {
-    return this.wonCampaings;
+    return this.wonCampaigns;
   }
 
   /**
@@ -146,8 +146,8 @@ public class EndOfDayMessage {
   @Override
   public String toString() {
     return "\n\t EndOfDayMessage: \n\t\t Day: " + this.day + ", \n\t\t Time: " + this.endOfDayTime + ",\n\t\t Statistics: " + this.statistics
-        + ", \n\t\t Campaigns up for auction: " + Printer.printNiceListMyCampaigns(auctionedCampaings) + ", \n\t\t Won campaigns: "
-        + Printer.printNiceListMyCampaigns(this.wonCampaings) + "\n\t\t Quality Score = " + this.qualityScore + "\n\t\t Cumulative Profit: "
+        + ", \n\t\t Campaigns up for auction: " + Printer.printNiceListMyCampaigns(auctionedCampaigns) + ", \n\t\t Won campaigns: "
+        + Printer.printNiceListMyCampaigns(this.wonCampaigns) + "\n\t\t Quality Score = " + this.qualityScore + "\n\t\t Cumulative Profit: "
         + this.cumulativeProfit;
   }
 }

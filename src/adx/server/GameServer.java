@@ -48,8 +48,9 @@ public class GameServer extends GameServerAbstract {
       Instant endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
       this.setUpGame();
       this.sendEndOfDayMessage();
+      int day = 0;
       // Play game
-      while (true) {
+      while (day < Parameters.TOTAL_SIMULATED_DAYS) {
         if (Instant.now().isAfter(endTime)) {
           // Time is up for the present day, stop accepting bids for this day
           // and run corresponding auctions.
@@ -66,6 +67,7 @@ public class GameServer extends GameServerAbstract {
                 Logging.log("[x] Error running some auction -> " + e.getMessage());
               }
               endTime = Instant.now().plusSeconds(Parameters.SECONDS_DURATION_DAY);
+              day++;
               this.sendEndOfDayMessage();
             }
           }
