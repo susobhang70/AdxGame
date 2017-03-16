@@ -60,10 +60,8 @@ public class GameAgent extends Agent {
   /**
    * Constructor.
    * 
-   * @param host
-   *          - on which the agent will try to connect.
-   * @param port
-   *          - the agent will use for the connection.
+   * @param host - on which the agent will try to connect.
+   * @param port - the agent will use for the connection.
    */
   public GameAgent(String host, int port) {
     super(host, port);
@@ -84,7 +82,7 @@ public class GameAgent extends Agent {
     List<Campaign> activeCampaigns = new ArrayList<Campaign>();
     for (Campaign c : this.myCampaigns) {
       if (this.currentDay >= c.getStartDay() && this.currentDay <= c.getEndDay()) {
-        if(!this.statistics.containsKey(c.getId()) || (this.statistics.containsKey(c.getId()) && this.statistics.get(c.getId()).getElement1() < c.getReach())) {
+        if (!this.statistics.containsKey(c.getId()) || (this.statistics.containsKey(c.getId()) && this.statistics.get(c.getId()).getElement1() < c.getReach())) {
           activeCampaigns.add(c);
         }
       }

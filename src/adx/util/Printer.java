@@ -1,6 +1,8 @@
 package adx.util;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import adx.structures.Campaign;
 
@@ -26,6 +28,20 @@ public class Printer {
       }
     } else {
       ret += "No campaigns in the give list.";
+    }
+    return ret;
+  }
+
+  /**
+   * String representation of statistics.
+   * 
+   * @param stats
+   * @return
+   */
+  public static String getNiceStatsTable(Map<Integer, Pair<Integer, Double>> stats) {
+    String ret = "";
+    for (Entry<Integer, Pair<Integer, Double>> x : stats.entrySet()) {
+      ret += "\n\tCampaign " + x.getKey() + ", Total Reach = " + x.getValue().getElement1() + ", Total Cost " + x.getValue().getElement2();
     }
     return ret;
   }

@@ -1,5 +1,7 @@
 package statistics;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -86,7 +88,7 @@ public class Statistics {
    * Getter.
    * 
    * @return the map of quality scores.
-   * @throws AdXException 
+   * @throws AdXException
    */
   public Double getQualityScore(int day, String agent) throws AdXException {
     if (!this.qualityScores.contains(day, agent)) {
@@ -99,10 +101,10 @@ public class Statistics {
    * Getter.
    * 
    * @return the map of quality scores.
-   * @throws AdXException 
+   * @throws AdXException
    */
   public Double getProfit(int day, String agent) throws AdXException {
-    if(!this.profit.contains(day, agent)) {
+    if (!this.profit.contains(day, agent)) {
       throw new AdXException("The profit on day " + day + ", for agent " + agent + ", does not exists");
     }
     return this.profit.get(day, agent);
@@ -162,10 +164,12 @@ public class Statistics {
         int totalReachSoFar = this.adsStatisticsHandler.getSummaryStatistic(agent, c.getId()).getElement1();
         int todayEffectiveReach = this.adsStatisticsHandler.getDailyEffectiveReach(day, agent, c.getId());
         double todayCost = this.adsStatisticsHandler.getDailySummaryStatistic(day, agent, c.getId()).getElement2();
-        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) - this.computeEffectiveReachRatio(totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
-        if(c.getEndDay() == day) {
+        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) - this.computeEffectiveReachRatio(
+            totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
+        if (c.getEndDay() == day) {
           // The campaign ended today, update the quality score.
-          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
+          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE
+              * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
         }
       }
     }
@@ -189,7 +193,7 @@ public class Statistics {
    * 
    * @return a human readable representation of the quality scores.
    */
-  public String printNiceQualityScoresTable() {
+  public String getNiceQualityScoresTable() {
     String ret = "";
     if (this.qualityScores.size() > 0) {
       for (Entry<Integer, Map<String, Double>> x : this.qualityScores.rowMap().entrySet()) {
@@ -209,7 +213,7 @@ public class Statistics {
    * 
    * @return a human readable representation of the quality scores.
    */
-  public String printNiceProfitScoresTable() {
+  public String getNiceProfitScoresTable() {
     String ret = "";
     if (this.profit.size() > 0) {
       for (Entry<Integer, Map<String, Double>> x : this.profit.rowMap().entrySet()) {
@@ -220,6 +224,28 @@ public class Statistics {
       }
     } else {
       ret += "Currently, no profits are registered";
+    }
+    return ret;
+  }
+
+  /**
+   * Printer.
+   * 
+   * @param day
+   * @return
+   */
+  public String getNiceProfitScoresTable(int day) {
+    NumberFormat formatter = new DecimalFormat("#0.00");   
+    String ret = "\n\t############## RESULT #############";
+    ret += "\n\t### Agent \t# Profit \t###";
+    ret += "\n\t###################################";
+    if (this.profit.size() > 0) {
+      for (Entry<String, Double> x : this.profit.row(day).entrySet()) {
+        ret += "\n\t### " + x.getKey() + " \t# " + formatter.format(x.getValue()) + " \t###";
+      }
+      ret += "\n\t###################################";
+    } else {
+      ret += "Currently, no profits are registered for day " + day;
     }
     return ret;
   }

@@ -214,7 +214,7 @@ public class AdAuctions {
    */
   public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, Statistics adStatistics) throws AdXException {
     HashMap<Query, Integer> samplePopulation = Sampling.samplePopulation(Parameters.POPULATION_SIZE);
-    Logging.log(samplePopulation);
+    Logging.log("[-] Population sampled = " + samplePopulation);
     for (Entry<Query, Integer> sample : samplePopulation.entrySet()) {
       Query query = sample.getKey();
       int supply = sample.getValue();

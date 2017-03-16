@@ -16,7 +16,6 @@ import com.esotericsoftware.kryonet.Listener;
  * This class implements common methods for an agent playing the game. This is an abstract class that must be extended by an agent that wants to play the game.
  * 
  * @author Enrique Areyan Viqueira
- *
  */
 public abstract class Agent {
 
@@ -27,8 +26,11 @@ public abstract class Agent {
    */
   private final Client client;
 
+  /**
+   * Constructor. Initializes with a null client.
+   */
   public Agent() {
-    client = null;
+    this.client = null;
   }
 
   /**

@@ -100,7 +100,7 @@ public class BidEntry {
 
   @Override
   public String toString() {
-    return "[Query: campaign id = " + this.campaignId + ", query = " + this.query + ", bid = " + bid + ", limit = " + this.limit + "]";
+    return "[Campaign id = " + this.campaignId + ", query = " + this.query + ", bid = " + bid + ", limit = " + this.limit + "]";
   }
 
 }

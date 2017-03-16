@@ -100,6 +100,15 @@ public class ServerState {
   /**
    * Getter.
    * 
+   * @return the statistics object.
+   */
+  public Statistics getStatistics() {
+    return this.statistics;
+  }
+
+  /**
+   * Getter.
+   * 
    * @return the time, in nanoseconds, the game started.
    */
   public long getGameStartTime() {
@@ -120,7 +129,7 @@ public class ServerState {
    * 
    * @param agent
    * @return
-   * @throws AdXException 
+   * @throws AdXException
    */
   public Double getQualitScore(String agent) throws AdXException {
     return this.statistics.getQualityScore(this.currentDay, agent);
@@ -131,7 +140,7 @@ public class ServerState {
    * 
    * @param agent
    * @return
-   * @throws AdXException 
+   * @throws AdXException
    */
   public Double getProfit(String agent) throws AdXException {
     return this.statistics.getProfit(this.currentDay, agent);
@@ -185,7 +194,7 @@ public class ServerState {
   public void registerCampaign(Campaign campaign, String agentName) throws AdXException {
     this.statistics.getStatisticsCampaign().registerCampaign(this.currentDay, campaign, agentName);
   }
-  
+
   /**
    * Updates quality scores.
    * 
@@ -224,7 +233,8 @@ public class ServerState {
    */
   public void validateBidBundle(int day, BidBundle bidBundle, String agent) throws AdXException {
     if (day != this.currentDay + 1) {
-      throw new AdXException("Received Bid bundle for day " + day + " for agent " + agent + ", but currently accepting for day " + (this.currentDay + 1) + ". Bid Bundle not accepted.");
+      throw new AdXException("Received Bid bundle for day " + day + " for agent " + agent + ", but currently accepting for day " + (this.currentDay + 1)
+          + ". Bid Bundle not accepted.");
     }
     for (BidEntry bidEntry : bidBundle.getBidEntries()) {
       int campaignId = bidEntry.getCampaignId();
@@ -290,7 +300,7 @@ public class ServerState {
     }
     Logging.log("[-] Done running campaign auction for day " + this.currentDay);
   }
-  
+
   /**
    * Runs all the ad auctions.
    * 
@@ -335,8 +345,8 @@ public class ServerState {
         "\n\t Campaign For Auction: " + this.printNiceCampaignForAuctionList());
     if (this.statistics != null)
       Logging.log("\t Ad Statistics: " + this.statistics.getStatisticsAds().printNiceAdStatisticsTable());
-    Logging.log("\t Quality Scores: " + this.statistics.printNiceQualityScoresTable());
-    Logging.log("\t Profit: " + this.statistics.printNiceProfitScoresTable());
+    Logging.log("\t Quality Scores: " + this.statistics.getNiceQualityScoresTable());
+    Logging.log("\t Profit: " + this.statistics.getNiceProfitScoresTable());
     Logging.log("\t Summary: " + this.statistics.getStatisticsAds().printNiceSummaryTable());
   }
 
