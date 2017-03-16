@@ -2,6 +2,9 @@ package statistics;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -185,7 +188,10 @@ public class Statistics {
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
   private double computeEffectiveReachRatio(double x, int reach) {
-    return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
+    // NOTE: the following is a sigmoid effective reach ratio.
+    // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
+    // NOTE: this is a linear effective reach ratio.
+    return Math.min(x / (double) reach, x);
   }
 
   /**
@@ -235,15 +241,33 @@ public class Statistics {
    * @return
    */
   public String getNiceProfitScoresTable(int day) {
-    NumberFormat formatter = new DecimalFormat("#0.00");   
-    String ret = "\n\t############## RESULT #############";
-    ret += "\n\t### Agent \t# Profit \t###";
-    ret += "\n\t###################################";
-    if (this.profit.size() > 0) {
-      for (Entry<String, Double> x : this.profit.row(day).entrySet()) {
-        ret += "\n\t### " + x.getKey() + " \t# " + formatter.format(x.getValue()) + " \t###";
+
+    List<Pair<String, Double>> finalScores = new ArrayList<Pair<String, Double>>();
+    for (Entry<String, Double> x : this.profit.row(day).entrySet()) {
+      finalScores.add(new Pair<String, Double>(x.getKey(), x.getValue()));
+    }
+    Collections.sort(finalScores, new Comparator<Pair<String, Double>>() {
+      @Override
+      public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
+        if (o1.getElement2() < o2.getElement2()) {
+          return 1;
+        } else if (o1.getElement2() > o2.getElement2()) {
+          return -1;
+        } else {
+          return 0;
+        }
       }
-      ret += "\n\t###################################";
+    });
+
+    NumberFormat formatter = new DecimalFormat("#0.00");
+    String ret = "\n\t################# RESULT ##################";
+    ret += "\n\t####      Agent \t#  Profit \t###";
+    ret += "\n\t###########################################";
+    if (finalScores.size() > 0) {
+      for (Pair<String, Double> x : finalScores) {
+        ret += "\n\t### " + String.format("%12s", x.getElement1()) + " \t# " + String.format("%8s", formatter.format(x.getElement2())) + " \t###";
+      }
+      ret += "\n\t###########################################";
     } else {
       ret += "Currently, no profits are registered for day " + day;
     }

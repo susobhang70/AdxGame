@@ -2,7 +2,6 @@ package adx.onedaygame;
 
 import adx.agent.Agent;
 import adx.messages.EndOfDayMessage;
-import adx.structures.BidBundle;
 import adx.structures.Campaign;
 import adx.util.Logging;
 import adx.util.Printer;
@@ -32,7 +31,6 @@ abstract public class OneDayAgent extends Agent {
   @Override
   protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
     int curr_day = endOfDayMessage.getDay();
-
     if (curr_day == 1) {
       this.myCampaign = endOfDayMessage.getCampaignsWon().get(0);
       Logging.log("[-] My campaign: " + this.myCampaign);
@@ -48,6 +46,6 @@ abstract public class OneDayAgent extends Agent {
    * 
    * @return the agent's bid bundle.
    */
-  abstract protected BidBundle getBidBundle();
+  abstract protected OneDayBidBundle getBidBundle();
 
 }

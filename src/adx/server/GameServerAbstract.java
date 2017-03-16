@@ -70,7 +70,7 @@ abstract public class GameServerAbstract {
     Startup.start(this.gameServer.getKryo());
     this.gameServer.addListener(new Listener() {
       public void received(Connection connection, Object message) {
-        // Logging.log("Received a connection");
+        // Logging.log("Received a connection -- > " + message);
         try {
           if (message instanceof ConnectServerMessage) {
             handleJoinGameMessage((ConnectServerMessage) message, connection);

@@ -16,22 +16,22 @@ public class BidBundle {
   /**
    * Day the bid bundle was sent for.
    */
-  private final int day;
+  protected final int day;
 
   /**
    * A bid bundle is composed of bid entries.
    */
-  private final Set<BidEntry> bidEntries;
+  protected final Set<BidEntry> bidEntries;
 
   /**
    * This map stores global limits on expenditure
    */
-  private final Map<Integer, Double> campaignsLimits;
+  protected final Map<Integer, Double> campaignsLimits;
 
   /**
    * This map stores bids of campaign as (CampaignId, Bid).
    */
-  private final Map<Integer, Double> campaignsBid;
+  protected final Map<Integer, Double> campaignsBid;
 
   /**
    * Constructor.
@@ -60,19 +60,6 @@ public class BidBundle {
     this.bidEntries = bidEntries;
     this.campaignsLimits = campaignsLimits;
     this.campaignsBid = campaignsBid;
-  }
-
-  /**
-   * Constructor for a bidbundle to play only one day games.
-   * 
-   * @param bidEntries
-   * @param campaignsLimits
-   */
-  public BidBundle(Set<BidEntry> bidEntries, Map<Integer, Double> campaignsLimits) {
-    this.day = 1;
-    this.campaignsBid = null;
-    this.bidEntries = bidEntries;
-    this.campaignsLimits = campaignsLimits;
   }
 
   /**

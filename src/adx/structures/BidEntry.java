@@ -13,22 +13,22 @@ public class BidEntry {
   /**
    * The campaign id to which this entry refers.
    */
-  private final int campaignId;
+  protected final int campaignId;
 
   /**
    * The query of this entry.
    */
-  private final Query query;
+  protected final Query query;
 
   /**
    * The bid placed on behalf of the campaign on this BidEntry's query.
    */
-  private final double bid;
+  protected final double bid;
 
   /**
    * A limit on expenditure by this campaign on this query.
    */
-  private final double limit;
+  protected final double limit;
 
   /**
    * Constructor.

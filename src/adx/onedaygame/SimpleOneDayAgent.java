@@ -1,13 +1,9 @@
 package adx.onedaygame;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import adx.exceptions.AdXException;
-import adx.structures.BidBundle;
-import adx.structures.BidEntry;
 import adx.structures.Query;
 import adx.util.Logging;
 
@@ -29,16 +25,13 @@ public class SimpleOneDayAgent extends OneDayAgent {
   }
 
   @Override
-  protected BidBundle getBidBundle() {
-    Set<BidEntry> bidEntries = new HashSet<BidEntry>();
-    // Limits are just given by the campaign.
-    Map<Integer, Double> limits = new HashMap<Integer, Double>();
-    limits.put(this.myCampaign.getId(), this.myCampaign.getBudget());
+  protected OneDayBidBundle getBidBundle() {
     try {
       // Bidding only on the exact market segment of the campaign.
-      bidEntries.add(new BidEntry(this.myCampaign.getId(), new Query(this.myCampaign.getMarketSegment()), 0.0, this.myCampaign.getBudget()));
+      Set<OneDayBidEntry> bidEntries = new HashSet<OneDayBidEntry>();
+      bidEntries.add(new OneDayBidEntry(new Query(this.myCampaign.getMarketSegment()), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), this.myCampaign.getBudget()));
       Logging.log("[-] bidEntries = " + bidEntries);
-      return new BidBundle(bidEntries, limits);
+      return new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
     } catch (AdXException e) {
       Logging.log("[x] Something went wrong getting the bid bundle " + e.getMessage());
       return null;
@@ -52,6 +45,6 @@ public class SimpleOneDayAgent extends OneDayAgent {
    */
   public static void main(String[] args) {
     SimpleOneDayAgent agent = new SimpleOneDayAgent("localhost", 9898);
-    agent.connect("agent0", "123456");
+    agent.connect("agent2", "123456");
   }
 }

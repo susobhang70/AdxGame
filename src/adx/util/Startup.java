@@ -7,6 +7,7 @@ import java.util.HashSet;
 import adx.messages.ACKMessage;
 import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
+import adx.onedaygame.OneDayBidBundle;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;
@@ -35,5 +36,6 @@ public class Startup {
     kryo.register(ACKMessage.class);
     kryo.register(Pair.class);
     kryo.register(ArrayList.class);
+    kryo.register(OneDayBidBundle.class);
   }
 }

@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList;
  */
 public class Parameters {
 
-  public static final int SECONDS_DURATION_DAY = 2;
+  public static final int SECONDS_DURATION_DAY = 10;
 
   public static final int POPULATION_SIZE = 10000;
 
