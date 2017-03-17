@@ -28,6 +28,16 @@ abstract public class OneDayAgent extends Agent {
     super(host, port);
   }
 
+  /**
+   * Connects the agent and registers its name. For simplicity, the password is fixed here.
+   * 
+   * @param name
+   * @param password
+   */
+  protected void connect(String login) {
+    super.connect(login, "123456");
+  }
+
   @Override
   protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
     int curr_day = endOfDayMessage.getDay();

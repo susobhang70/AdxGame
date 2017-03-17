@@ -31,6 +31,7 @@ public class SimpleOneDayAgent extends OneDayAgent {
       Set<OneDayBidEntry> bidEntries = new HashSet<OneDayBidEntry>();
       bidEntries.add(new OneDayBidEntry(new Query(this.myCampaign.getMarketSegment()), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), this.myCampaign.getBudget()));
       Logging.log("[-] bidEntries = " + bidEntries);
+      // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
       return new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
     } catch (AdXException e) {
       Logging.log("[x] Something went wrong getting the bid bundle " + e.getMessage());
@@ -45,6 +46,6 @@ public class SimpleOneDayAgent extends OneDayAgent {
    */
   public static void main(String[] args) {
     SimpleOneDayAgent agent = new SimpleOneDayAgent("localhost", 9898);
-    agent.connect("agent2", "123456");
+    agent.connect("agent2");
   }
 }
