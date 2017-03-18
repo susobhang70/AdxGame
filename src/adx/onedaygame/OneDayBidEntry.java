@@ -2,6 +2,7 @@ package adx.onedaygame;
 
 import adx.exceptions.AdXException;
 import adx.structures.BidEntry;
+import adx.structures.MarketSegment;
 import adx.structures.Query;
 
 /**
@@ -26,9 +27,9 @@ public class OneDayBidEntry extends BidEntry {
    * @param limit
    * @throws AdXException
    */
-  public OneDayBidEntry(Query query, double bid, double limit) throws AdXException {
+  public OneDayBidEntry(MarketSegment marketSegment, double bid, double limit) throws AdXException {
     // The Integer.MAX_VALUE is just a place holder, this value will get replaced later.
-    super(Integer.MAX_VALUE, query, bid, limit);
+    super(Integer.MAX_VALUE, new Query(marketSegment), bid, limit);
   }
   
   @Override

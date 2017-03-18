@@ -1,7 +1,5 @@
 package statistics;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,14 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
 import adx.util.InputValidators;
 import adx.util.Pair;
 import adx.util.Parameters;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import adx.util.Printer;
 
 /**
  * Maintains all of the game's statistics. The statistics are divided in two categories: campaigns and ads. Each category has its own handler.
@@ -190,8 +189,8 @@ public class Statistics {
   private double computeEffectiveReachRatio(double x, int reach) {
     // NOTE: the following is a sigmoid effective reach ratio.
     // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
-    // NOTE: this is a linear effective reach ratio.
-    return Math.min(x / (double) reach, x);
+    // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
+    return Math.min(x / (double) reach, 1.0);
   }
 
   /**
@@ -241,9 +240,18 @@ public class Statistics {
    * @return
    */
   public String getNiceProfitScoresTable(int day) {
+    return Printer.getNiceProfitTable(this.orderProfits(this.profit.row(day).entrySet()), day);
+  }
 
+  /**
+   * Given a set of entries <Agent, Profit> return a list of ordered Pairs <Agent, Profit>
+   * 
+   * @param agentsProfits
+   * @return
+   */
+  public List<Pair<String, Double>> orderProfits(Set<Entry<String, Double>> agentsProfits) {
     List<Pair<String, Double>> finalScores = new ArrayList<Pair<String, Double>>();
-    for (Entry<String, Double> x : this.profit.row(day).entrySet()) {
+    for (Entry<String, Double> x : agentsProfits) {
       finalScores.add(new Pair<String, Double>(x.getKey(), x.getValue()));
     }
     Collections.sort(finalScores, new Comparator<Pair<String, Double>>() {
@@ -258,19 +266,6 @@ public class Statistics {
         }
       }
     });
-
-    NumberFormat formatter = new DecimalFormat("#0.00");
-    String ret = "\n\t################# RESULT ##################";
-    ret += "\n\t####      Agent \t#  Profit \t###";
-    ret += "\n\t###########################################";
-    if (finalScores.size() > 0) {
-      for (Pair<String, Double> x : finalScores) {
-        ret += "\n\t### " + String.format("%12s", x.getElement1()) + " \t# " + String.format("%8s", formatter.format(x.getElement2())) + " \t###";
-      }
-      ret += "\n\t###########################################";
-    } else {
-      ret += "Currently, no profits are registered for day " + day;
-    }
-    return ret;
+    return finalScores;
   }
 }

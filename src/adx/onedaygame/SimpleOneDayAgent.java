@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import adx.exceptions.AdXException;
-import adx.structures.Query;
 import adx.util.Logging;
 
 /**
@@ -29,7 +28,7 @@ public class SimpleOneDayAgent extends OneDayAgent {
     try {
       // Bidding only on the exact market segment of the campaign.
       Set<OneDayBidEntry> bidEntries = new HashSet<OneDayBidEntry>();
-      bidEntries.add(new OneDayBidEntry(new Query(this.myCampaign.getMarketSegment()), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), this.myCampaign.getBudget()));
+      bidEntries.add(new OneDayBidEntry(this.myCampaign.getMarketSegment(), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), this.myCampaign.getBudget()));
       Logging.log("[-] bidEntries = " + bidEntries);
       // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
       return new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
@@ -46,6 +45,6 @@ public class SimpleOneDayAgent extends OneDayAgent {
    */
   public static void main(String[] args) {
     SimpleOneDayAgent agent = new SimpleOneDayAgent("localhost", 9898);
-    agent.connect("agent2");
+    agent.connect("agent0");
   }
 }

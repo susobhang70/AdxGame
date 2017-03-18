@@ -33,12 +33,12 @@ public class ServerState {
   /**
    * A unique identifier of the game.
    */
-  private final int gameId;
+  private int gameId;
 
   /**
    * Starting time of the game.
    */
-  private final long gameStartTime;
+  private long gameStartTime;
 
   /**
    * Current simulated day.
@@ -69,17 +69,34 @@ public class ServerState {
    * An object that stores the campaigns for auction each day.
    */
   private Map<Integer, List<Campaign>> campaignsForAuction;
+  
+  /**
+   * Profit over all games played.
+   */
+  private final Map<String, Double> acumProfitOverAllGames;
 
   /**
    * Constructor.
    * 
    * @param gameId
+   * @throws AdXException 
    */
-  public ServerState(int gameId) {
+  public ServerState(int gameId) throws AdXException {
+    initServerState(gameId);
+    this.agentsNames = new HashSet<String>();
+    this.acumProfitOverAllGames = new HashMap<String, Double>();
+  }
+  
+  /**
+   * Initialize the server for a new game
+   * 
+   * @param gameId
+   * @throws AdXException 
+   */
+  public void initServerState(int gameId) throws AdXException {
     this.gameId = gameId;
     this.gameStartTime = System.nanoTime();
     this.currentDay = 0;
-    this.agentsNames = new HashSet<String>();
     this.bidBundles = HashBasedTable.create();
     this.campaignsForAuction = new HashMap<Integer, List<Campaign>>();
   }
@@ -87,13 +104,28 @@ public class ServerState {
   /**
    * Initialize the statistics object.
    * 
-   * @throws AdXException
-   *           in case the statistics object is initialize more than once.
+   * @throws AdXException in case the statistics object is initialize more than once.
    */
   public void initStatistics() throws AdXException {
-    // Initialize the statistics object, only once.
-    if (this.statistics == null) {
+    if (this.agentsNames != null || this.agentsNames.size() == 0) {
       this.statistics = new Statistics(this.agentsNames);
+    } else {
+      throw new AdXException("Trying to create the statistics object with a null or empty set of agentsName");
+    }
+  }
+
+  /**
+   * Saves the profit of each game into one map.
+   * 
+   * @throws AdXException
+   */
+  public void saveProfit() throws AdXException {
+    for (String agentName : this.agentsNames) {
+      double profit = 0.0;
+      if (this.acumProfitOverAllGames.get(agentName) != null) {
+        profit = this.acumProfitOverAllGames.get(agentName);
+      }
+      this.acumProfitOverAllGames.put(agentName, profit + this.statistics.getProfit(this.currentDay, agentName));
     }
   }
 
@@ -165,6 +197,18 @@ public class ServerState {
    */
   public Map<Integer, Pair<Integer, Double>> getDailySummaryStatistic(String agent) {
     return this.statistics.getStatisticsAds().getDailySummaryStatistic(this.currentDay, agent);
+  }
+  
+  /**
+   * Getter. 
+   * @return
+   */
+  public Map<String, Double> getAverageAcumProfitOverAllGames(int numberOfGames) {
+    Map<String, Double> average = new HashMap<String, Double>();
+    for(Entry<String, Double> x : this.acumProfitOverAllGames.entrySet()) {
+      average.put(x.getKey(), x.getValue() / (double) numberOfGames);
+    }
+    return average;
   }
 
   /**

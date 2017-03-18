@@ -45,7 +45,7 @@ abstract public class GameServerAbstract {
   /**
    * Current game.
    */
-  protected int gameNumber = 0;
+  protected int gameNumber = 1;
 
   /**
    * An object that maintains the state of the server.
@@ -57,8 +57,9 @@ abstract public class GameServerAbstract {
    * 
    * @param port
    * @throws IOException
+   * @throws AdXException 
    */
-  public GameServerAbstract(int port) throws IOException {
+  public GameServerAbstract(int port) throws IOException, AdXException {
 
     Logging.log("[-] Server Initialized at " + Instant.now());
     this.namesToConnections = new ConcurrentHashMap<String, Connection>();
@@ -87,7 +88,6 @@ abstract public class GameServerAbstract {
         }
       }
     });
-    this.gameNumber++;
     this.serverState = new ServerState(this.gameNumber);
   }
   
@@ -149,7 +149,7 @@ abstract public class GameServerAbstract {
    * @param connection
    */
   protected void handleBidBundleMessage(BidBundle bidBundle, Connection connection) {
-    Logging.log("[-] Received the following bid bundle: \n\t " + bidBundle + ", from " + connection);
+    Logging.log("[-] Received the following bid bundle: \n\t " + bidBundle + ", from " + this.connectionsToNames.get(connection));
     Pair<Boolean, String> bidBundleAccept = this.serverState.addBidBundle(bidBundle.getDay(), this.connectionsToNames.get(connection), bidBundle);
     if (bidBundleAccept.getElement1()) {
       connection.sendTCP(new ACKMessage(true, "Bid bundle for day " + bidBundle.getDay() + " received OK."));

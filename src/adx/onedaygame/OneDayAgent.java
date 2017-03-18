@@ -43,6 +43,7 @@ abstract public class OneDayAgent extends Agent {
     int curr_day = endOfDayMessage.getDay();
     if (curr_day == 1) {
       this.myCampaign = endOfDayMessage.getCampaignsWon().get(0);
+      Logging.log("\n[-] Playing a new game!");
       Logging.log("[-] My campaign: " + this.myCampaign);
       this.getClient().sendTCP(this.getBidBundle());
     } else {
