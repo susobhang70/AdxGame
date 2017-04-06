@@ -7,18 +7,18 @@ import java.util.HashSet;
 import adx.messages.ACKMessage;
 import adx.messages.ConnectServerMessage;
 import adx.messages.EndOfDayMessage;
-import adx.onedaygame.OneDayBidBundle;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;
 import adx.structures.MarketSegment;
 import adx.structures.Query;
+import adx.variants.onedaygame.OneDayBidBundle;
+import adx.variants.twodaysgame.TwoDaysBidBundle;
 
 import com.esotericsoftware.kryo.Kryo;
 
 /**
- * Handles common startup operations.
- * In particular, register all classes to be sent as part of messages.
+ * Handles common startup operations. In particular, register all classes to be sent as part of messages.
  * 
  * @author Enrique Areyan Viqueira
  */
@@ -37,5 +37,6 @@ public class Startup {
     kryo.register(Pair.class);
     kryo.register(ArrayList.class);
     kryo.register(OneDayBidBundle.class);
+    kryo.register(TwoDaysBidBundle.class);
   }
 }

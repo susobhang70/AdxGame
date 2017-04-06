@@ -1,4 +1,4 @@
-package adx.onedaygame;
+package adx.variants.onedaygame;
 
 import adx.agent.Agent;
 import adx.messages.EndOfDayMessage;
@@ -14,7 +14,7 @@ import adx.util.Printer;
 abstract public class OneDayAgent extends Agent {
 
   /**
-   * In this game agents have only one campaign.z
+   * In this game agents have only one campaign
    */
   protected Campaign myCampaign;
 
@@ -40,8 +40,8 @@ abstract public class OneDayAgent extends Agent {
 
   @Override
   protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
-    int curr_day = endOfDayMessage.getDay();
-    if (curr_day == 1) {
+    int currentDay = endOfDayMessage.getDay();
+    if (currentDay == 1) {
       this.myCampaign = endOfDayMessage.getCampaignsWon().get(0);
       Logging.log("\n[-] Playing a new game!");
       Logging.log("[-] My campaign: " + this.myCampaign);

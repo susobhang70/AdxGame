@@ -149,6 +149,7 @@ public class Statistics {
   }
 
   /**
+   * Computes the quality score and cumulative profit of an agent in a given day.
    * 
    * @param day
    * @param agent
@@ -188,7 +189,7 @@ public class Statistics {
    */
   private double computeEffectiveReachRatio(double x, int reach) {
     // NOTE: the following is a sigmoid effective reach ratio.
-    // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
+    //return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
     // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
     return Math.min(x / (double) reach, 1.0);
   }

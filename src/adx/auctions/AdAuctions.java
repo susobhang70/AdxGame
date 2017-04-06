@@ -157,7 +157,7 @@ public class AdAuctions {
       double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
       // We can either take the whole supply or as much as allowed by our limits (up to flooring numbers)
       double limitSpend = Math.min(supply * winnerCost,
-          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getStatisticsAds().getDailySummaryStatistic(0, winnerName, winnerBidEntry.getCampaignId()).getElement2()));
+          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getStatisticsAds().getDailySummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2()));
       winCount = (int) Math.floor(limitSpend / winnerCost);
       winCost = winCount * winnerCost;
     } else {
