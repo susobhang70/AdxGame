@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import statistics.Statistics;
 import adx.exceptions.AdXException;
+import adx.statistics.Statistics;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Query;

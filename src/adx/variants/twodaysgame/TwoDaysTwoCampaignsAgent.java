@@ -4,26 +4,24 @@ import adx.agent.Agent;
 import adx.messages.EndOfDayMessage;
 import adx.structures.Campaign;
 import adx.util.Logging;
-import adx.util.Pair;
 import adx.util.Printer;
 
 /**
- * An abstract class to be implemented by an agent playing the TwoDays game.
+ * An abstract class to be implemented by an agent playing the TwoCampaings-TwoDays game.
  * 
  * @author Enrique Areyan Viqueira
  */
-abstract public class TwoDaysAgent extends Agent {
+abstract public class TwoDaysTwoCampaignsAgent extends Agent {
 
   /**
-   * In this game agents have only one campaign.
+   * Campaign of day 1
    */
-  protected Campaign myCampaign;
+  protected Campaign firstCampaign;
 
   /**
-   * Easy access to the statistics from day 1, reach and cost.
+   * Campaign of day 2
    */
-  protected int reachDay1;
-  protected double costDay1;
+  protected Campaign secondCampaign;
 
   /**
    * Constructor.
@@ -31,7 +29,7 @@ abstract public class TwoDaysAgent extends Agent {
    * @param host
    * @param port
    */
-  public TwoDaysAgent(String host, int port) {
+  public TwoDaysTwoCampaignsAgent(String host, int port) {
     super(host, port);
   }
 
@@ -49,10 +47,10 @@ abstract public class TwoDaysAgent extends Agent {
   protected void handleEndOfDayMessage(EndOfDayMessage endOfDayMessage) {
     int currentDay = endOfDayMessage.getDay();
     if (currentDay == 1) {
-      // Start of the game, day 1
-      this.myCampaign = endOfDayMessage.getCampaignsWon().get(0);
       Logging.log("\n[-] Playing a new game!");
-      Logging.log("[-] My campaign: " + this.myCampaign);
+      // Start of the game, day 1
+      this.firstCampaign = endOfDayMessage.getCampaignsWon().get(0);
+      Logging.log("[-] My first campaign: " + this.firstCampaign);
       Logging.log("[-] End of Day 1, bid.");
       TwoDaysBidBundle bidBundleDay1 = this.getBidBundle(1);
       if (bidBundleDay1 != null) {
@@ -62,10 +60,10 @@ abstract public class TwoDaysAgent extends Agent {
       }
     } else if (currentDay == 2) {
       // Day 2.
-      Pair<Integer, Double> statsDay1 = endOfDayMessage.getStatistics().get(this.myCampaign.getId());
-      this.reachDay1 = statsDay1.getElement1();
-      this.costDay1 = statsDay1.getElement2();
+      this.secondCampaign = endOfDayMessage.getCampaignsWon().get(0);
+      Logging.log("[-] My second campaign: " + this.secondCampaign);
       Logging.log("[-] Statistics from day 1: " + Printer.getNiceStatsTable(endOfDayMessage.getStatistics()));
+      Logging.log("[-] Quality from day 1: " + endOfDayMessage.getQualityScore());
       Logging.log("[-] Profit from day 1: " + endOfDayMessage.getCumulativeProfit());
       Logging.log("[-] End of Day 2, bid.");
       TwoDaysBidBundle bidBundleDay2 = this.getBidBundle(2);

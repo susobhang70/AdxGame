@@ -12,7 +12,7 @@ import adx.util.Logging;
  * 
  * @author Enrique Areyan Viqueira
  */
-public class SimpleTwoDaysAgent extends TwoDaysAgent {
+public class SimpleTwoDaysOneCampaignAgent extends TwoDaysOneCampaignAgent {
 
   /**
    * Constructor.
@@ -20,7 +20,7 @@ public class SimpleTwoDaysAgent extends TwoDaysAgent {
    * @param host
    * @param port
    */
-  public SimpleTwoDaysAgent(String host, int port) {
+  public SimpleTwoDaysOneCampaignAgent(String host, int port) {
     super(host, port);
   }
 
@@ -58,7 +58,7 @@ public class SimpleTwoDaysAgent extends TwoDaysAgent {
    * @param args
    */
   public static void main(String[] args) {
-    SimpleTwoDaysAgent agent = new SimpleTwoDaysAgent("localhost", 9898);
+    SimpleTwoDaysOneCampaignAgent agent = new SimpleTwoDaysOneCampaignAgent("localhost", 9898);
     agent.connect("agent1");
   }
 }

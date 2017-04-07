@@ -12,9 +12,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import statistics.Statistics;
 import adx.auctions.AdAuctions;
 import adx.exceptions.AdXException;
+import adx.statistics.Statistics;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;

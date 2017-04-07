@@ -1,4 +1,4 @@
-package statistics;
+package adx.statistics;
 
 import java.util.HashMap;
 import java.util.Map;

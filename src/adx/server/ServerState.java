@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import statistics.Statistics;
 import adx.auctions.AdAuctions;
 import adx.auctions.CampaignAuctions;
 import adx.exceptions.AdXException;
+import adx.statistics.Statistics;
 import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.Campaign;
@@ -69,7 +69,7 @@ public class ServerState {
    * An object that stores the campaigns for auction each day.
    */
   private Map<Integer, List<Campaign>> campaignsForAuction;
-  
+
   /**
    * Profit over all games played.
    */
@@ -79,19 +79,19 @@ public class ServerState {
    * Constructor.
    * 
    * @param gameId
-   * @throws AdXException 
+   * @throws AdXException
    */
   public ServerState(int gameId) throws AdXException {
     initServerState(gameId);
     this.agentsNames = new HashSet<String>();
     this.acumProfitOverAllGames = new HashMap<String, Double>();
   }
-  
+
   /**
-   * Initialize the server for a new game
+   * Initialize the server for a new game.
    * 
    * @param gameId
-   * @throws AdXException 
+   * @throws AdXException
    */
   public void initServerState(int gameId) throws AdXException {
     this.gameId = gameId;
@@ -160,7 +160,7 @@ public class ServerState {
    * Gets the agent's current quality score.
    * 
    * @param agent
-   * @return
+   * @return the agent's current quality score.
    * @throws AdXException
    */
   public Double getQualitScore(String agent) throws AdXException {
@@ -182,7 +182,7 @@ public class ServerState {
    * Given an agent, returns a list of all campaigns won by the agent in the current day.
    * 
    * @param agent
-   * @return
+   * @return the list of campaigns won by an agent.
    */
   public List<Campaign> getWonCampaigns(String agent) {
     return this.statistics.getStatisticsCampaign().getWonCampaigns(this.currentDay, agent);
@@ -191,22 +191,23 @@ public class ServerState {
   /**
    * Returns the daily summary statistics.
    * 
-   * @param day
    * @param agent
-   * @return
+   * @return the daily summary statistics for a given agent.
    */
   public Map<Integer, Pair<Integer, Double>> getDailySummaryStatistic(String agent) {
     return this.statistics.getStatisticsAds().getDailySummaryStatistic(this.currentDay, agent);
   }
-  
+
   /**
-   * Getter. 
-   * @return
+   * Getter.
+   * 
+   * @return the cumulative profit over numberOfGames many games played
    */
   public Map<String, Double> getAverageAcumProfitOverAllGames(int numberOfGames) {
     Map<String, Double> average = new HashMap<String, Double>();
-    for(Entry<String, Double> x : this.acumProfitOverAllGames.entrySet()) {
-      average.put(x.getKey(), x.getValue() / (double) numberOfGames);
+    // Agent is the key, profit is the value.
+    for (Entry<String, Double> agentProfit : this.acumProfitOverAllGames.entrySet()) {
+      average.put(agentProfit.getKey(), agentProfit.getValue() / (double) numberOfGames);
     }
     return average;
   }

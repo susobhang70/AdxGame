@@ -29,7 +29,7 @@ public class Printer {
         ret += "\n\t\t" + c;
       }
     } else {
-      ret += "No campaigns in the give list.";
+      ret += "No campaigns in the given list.";
     }
     return ret;
   }

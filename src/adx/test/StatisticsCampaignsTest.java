@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import statistics.Statistics;
 import adx.exceptions.AdXException;
+import adx.statistics.Statistics;
 import adx.structures.Campaign;
 import adx.structures.MarketSegment;
 
