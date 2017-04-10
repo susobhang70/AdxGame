@@ -40,7 +40,7 @@ public class GameServer extends GameServerAbstract {
    */
   protected void runAdXGame() throws AdXException {
     // First order of business is to accept connections for a fixed amount of time
-    Instant deadlineForNewPlayers = Instant.now().plusSeconds(5);
+    Instant deadlineForNewPlayers = Instant.now().plusSeconds(10);
     Logging.log("[-] Accepting connections until " + deadlineForNewPlayers);
     while (Instant.now().isBefore(deadlineForNewPlayers));
     // Do not accept any new agents beyond deadline. Play with present agents.

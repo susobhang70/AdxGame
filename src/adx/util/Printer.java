@@ -47,7 +47,22 @@ public class Printer {
     }
     return ret;
   }
-  
+
+  /**
+   * String representation of statistics.
+   * 
+   * @param stats
+   * @return
+   */
+  public static String getNiceStatsTable(int day, Map<Integer, Pair<Integer, Double>> stats) {
+    String ret = "";
+    for (Entry<Integer, Pair<Integer, Double>> x : stats.entrySet()) {
+      ret += "\n\tCampaign " + x.getKey() + ", Total Reach On Day " + day + " = " + x.getValue().getElement1() + ", Total Cost On Day " + day + "="
+          + x.getValue().getElement2();
+    }
+    return ret;
+  }
+
   /**
    * Prints a nice representation of the profits.
    * 
@@ -67,7 +82,7 @@ public class Printer {
       ret += "\n\t###########################################";
     } else {
       ret += "Currently, no profits are registered for day " + day;
-    }  
+    }
     return ret;
   }
 

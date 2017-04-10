@@ -40,6 +40,7 @@ public class SimpleTwoDaysOneCampaignAgent extends TwoDaysOneCampaignAgent {
         // Bidding only on the exact market segment of the campaign.
         Set<SimpleBidEntry> bidEntries = new HashSet<SimpleBidEntry>();
         bidEntries.add(new SimpleBidEntry(this.myCampaign.getMarketSegment(), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), limit));
+        //bidEntries.add(new SimpleBidEntry(this.myCampaign.getMarketSegment(), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), 1.0));
         Logging.log("[-] bidEntries = " + bidEntries);
         // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
         return new TwoDaysBidBundle(day, this.myCampaign.getId(), limit, bidEntries);

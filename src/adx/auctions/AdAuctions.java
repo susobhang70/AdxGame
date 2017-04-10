@@ -67,17 +67,20 @@ public class AdAuctions {
     InputValidators.validateNotNull(limits);
     InputValidators.validateNotNull(adStatistics);
     Collections.sort(bids, AdAuctions.bidComparator);
+    int winCount;
     // Keep the auction running while there is supply and at least one bidder.
     while (supply > 0 && bids.size() > 0) {
       // Determine winner
       Pair<Double, List<Pair<String, BidEntry>>> winnerPairList = AdAuctions.winnerDetermination(bids);
-      int winCount;
+      
       // There was only one winner.
-      if (winnerPairList.getElement2().size() == 1) {
-        winCount = AdAuctions.uniqueWinner(day, supply, query, winnerPairList.getElement1(), winnerPairList.getElement2().get(0), bids, limits, adStatistics);
-      } else {
+      //if (winnerPairList.getElement2().size() == 1) {
+        //Logging.log("Unique winner = " + winnerPairList);
+      //  winCount = AdAuctions.uniqueWinner(day, supply, query, winnerPairList.getElement1(), winnerPairList.getElement2().get(0), bids, limits, adStatistics);
+      //} else {
+        //Logging.log("Multiple winner, chosen, random, winner = " + winnerPairList);
         winCount = AdAuctions.multipleWinners(day, query, winnerPairList.getElement1(), winnerPairList, bids, limits, adStatistics);
-      }
+      //}
       // Decrement supply according to how much was allocated.
       supply -= winCount;
     }
@@ -100,10 +103,10 @@ public class AdAuctions {
    */
   private static int multipleWinners(int day, Query query, Double winCost, Pair<Double, List<Pair<String, BidEntry>>> winnerPairList,
       List<Pair<String, BidEntry>> bids, Map<Integer, Double> limits, Statistics adStatistics) throws AdXException {
-    // There are at least two winners. We will allocate only one chosen at random.
+    // Shuffle the list of winners. 
     List<Pair<String, BidEntry>> winnerList = winnerPairList.getElement2();
     Collections.shuffle(winnerList);
-    //Logging.log("\tChoosen, random, winner = " + winnerList.get(0));
+    
     BidEntry winnerBidEntry = winnerList.get(0).getElement2();
     String winnerName = winnerList.get(0).getElement1();
     Double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
@@ -113,13 +116,8 @@ public class AdAuctions {
     }
     Double querySpendSoFar = adStatistics.getStatisticsAds().getDailyStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query).getElement2();
     if (totalSpendSoFar + winCost <= dailyLimit && querySpendSoFar + winCost <= winnerBidEntry.getLimit()) {
-      // This guy is allowed to take one more, allocate one more to him.
+      // This bidder is allowed to take one more, allocate one more to him.
       adStatistics.getStatisticsAds().addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, 1, winCost);
-      // Can this guy still be on the auction? We know that winCost will be the winCost for this guy in the future
-      // So we can just check if he can buy one more
-      if (totalSpendSoFar + 2 * winCost > dailyLimit || querySpendSoFar + 2 * winCost > winnerBidEntry.getLimit()) {
-        bids.remove(winnerList.get(0));
-      }
       return 1;
     } else {
       // Limits have been reach, remove this bidder.
@@ -128,6 +126,8 @@ public class AdAuctions {
     }
   }
 
+  
+  //This function has some bug.
   /**
    * Handles the case where there is a unique winner in the auction. In this case we can allocate a chunk of impressions at a time.
    * 
@@ -141,11 +141,10 @@ public class AdAuctions {
    * @param adStatistics
    * @return
    * @throws AdXException
-   */
+   
   private static int uniqueWinner(int day, int supply, Query query, Double winnerCost, Pair<String, BidEntry> winner, List<Pair<String, BidEntry>> bids,
       Map<Integer, Double> limits, Statistics adStatistics) throws AdXException {
     // Remove winner from further consideration.
-    //Logging.log("Unique winner = " + winner);
     bids.remove(winner);
     String winnerName = winner.getElement1();
     BidEntry winnerBidEntry = winner.getElement2();
@@ -157,7 +156,9 @@ public class AdAuctions {
       double dailyLimit = (limits.containsKey(winnerBidEntry.getCampaignId())) ? limits.get(winnerBidEntry.getCampaignId()) : Double.MAX_VALUE;
       // We can either take the whole supply or as much as allowed by our limits (up to flooring numbers)
       double limitSpend = Math.min(supply * winnerCost,
-          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getStatisticsAds().getDailySummaryStatistic(day, winnerName, winnerBidEntry.getCampaignId()).getElement2()));
+          Math.min(winnerBidEntry.getLimit(), dailyLimit - adStatistics.getStatisticsAds().getSummaryStatistic(winnerName, winnerBidEntry.getCampaignId()).getElement2()));
+      // Make sure the limit spend is not negative.
+      limitSpend = Math.max(limitSpend, 0);
       winCount = (int) Math.floor(limitSpend / winnerCost);
       winCost = winCount * winnerCost;
     } else {
@@ -170,7 +171,7 @@ public class AdAuctions {
     // Add the statistics about what this campaign won.
     adStatistics.getStatisticsAds().addStatistic(day, winnerName, winnerBidEntry.getCampaignId(), query, winCount, winCost);
     return winCount;
-  }
+  }*/
 
   /**
    * Given a list of ORDERED bids, returns a pair (price,winner). If more that one winner exists, one is returned at random. This function assumes there is at
@@ -194,12 +195,15 @@ public class AdAuctions {
     double winningBid = bids.get(0).getElement2().getBid();
     Iterator<Pair<String, BidEntry>> bidsListIterator = bids.iterator();
     Pair<String, BidEntry> currentBidder = null;
+    // Keep adding bidders to the winnerList as long as their bids match the winning bid.
     while ((bidsListIterator.hasNext()) && ((currentBidder = bidsListIterator.next()) != null) && currentBidder.getElement2().getBid() == winningBid) {
       winnerList.add(currentBidder);
     }
     if (winnerList.size() == 0) {
       throw new AdXException("There has to be at least one winner.");
     }
+    // If there is only one winner, then the payment is that of the second bidder (in currentBidder). 
+    // Otherwise, there is a tie for first place which means the payment is the winningBid.
     Double winningCost = (winnerList.size() == 1) ? currentBidder.getElement2().getBid() : winningBid;
     return new Pair<Double, List<Pair<String, BidEntry>>>(winningCost, winnerList);
   }

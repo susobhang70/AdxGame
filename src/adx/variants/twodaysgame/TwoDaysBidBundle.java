@@ -33,8 +33,8 @@ public class TwoDaysBidBundle extends BidBundle {
    * @param campaignsLimits
    * @throws AdXException
    */
-  public TwoDaysBidBundle(int day, int campaignId, double limit, Set<SimpleBidEntry> oneDayBidEntries) throws AdXException {
-    super(day, BidBundleHelper.createBidEntries(campaignId, oneDayBidEntries), BidBundleHelper.createLimits(campaignId, limit), null);
+  public TwoDaysBidBundle(int day, int campaignId, double limit, Set<SimpleBidEntry> simpleBidEntries) throws AdXException {
+    super(day, BidBundleHelper.createBidEntries(campaignId, simpleBidEntries), BidBundleHelper.createLimits(campaignId, limit), null);
     if (day != 1 && day != 2) {
       throw new AdXException("The day of a TwoDays BidBundle must be either 1 or 2, received: " + day);
     }

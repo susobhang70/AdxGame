@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
 import adx.util.InputValidators;
 import adx.util.Pair;
 import adx.util.Parameters;
 import adx.util.Printer;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 /**
  * Maintains all of the game's statistics. The statistics are divided in two categories: campaigns and ads. Each category has its own handler.
@@ -167,12 +167,12 @@ public class Statistics {
         int totalReachSoFar = this.adsStatisticsHandler.getSummaryStatistic(agent, c.getId()).getElement1();
         int todayEffectiveReach = this.adsStatisticsHandler.getDailyEffectiveReach(day, agent, c.getId());
         double todayCost = this.adsStatisticsHandler.getDailySummaryStatistic(day, agent, c.getId()).getElement2();
-        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) - this.computeEffectiveReachRatio(
-            totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
+        //TODO: the profit and quality score should be a function of the effective reach only!
+        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) 
+                        - this.computeEffectiveReachRatio(totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
         if (c.getEndDay() == day) {
           // The campaign ended today, update the quality score.
-          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE
-              * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
+          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
         }
       }
     }
@@ -188,10 +188,11 @@ public class Statistics {
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
   private double computeEffectiveReachRatio(double x, int reach) {
+    //Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
     // NOTE: the following is a sigmoid effective reach ratio.
-    //return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
+    return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
     // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
-    return Math.min(x / (double) reach, 1.0);
+   // return Math.min(x / (double) reach, 1.0);
   }
 
   /**

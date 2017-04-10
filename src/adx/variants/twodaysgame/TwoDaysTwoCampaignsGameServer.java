@@ -32,7 +32,7 @@ public class TwoDaysTwoCampaignsGameServer extends GameServer {
   @Override
   protected void runAdXGame() throws AdXException {
     // First order of business is to accept connections for a fixed amount of time
-    Instant deadlineForNewPlayers = Instant.now().plusSeconds(5);
+    Instant deadlineForNewPlayers = Instant.now().plusSeconds(10);
     Logging.log("[-] Accepting connections until " + deadlineForNewPlayers);
     while (Instant.now().isBefore(deadlineForNewPlayers));
     // Do not accept any new agents beyond deadline. Play with present agents.
@@ -102,7 +102,8 @@ public class TwoDaysTwoCampaignsGameServer extends GameServer {
     for (String agent : this.connectionsToNames.values()) {
       Logging.log("\t\t Sending a new campaign to " + agent + " with QS = " + this.serverState.getQualitScore(agent));
       Campaign c = Sampling.sampleCampaign(1);
-      c.setBudget(c.getReach() * this.serverState.getQualitScore(agent));
+      // To avoid potential problem with the campaign object, the budget is at least 0.1.
+      c.setBudget(Math.max(0.1, c.getReach() * this.serverState.getQualitScore(agent)));
       Logging.log("\t\t\t" + c);
       this.serverState.registerCampaign(c, agent);
     }

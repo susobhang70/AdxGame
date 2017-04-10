@@ -65,7 +65,7 @@ abstract public class TwoDaysOneCampaignAgent extends Agent {
       Pair<Integer, Double> statsDay1 = endOfDayMessage.getStatistics().get(this.myCampaign.getId());
       this.reachDay1 = statsDay1.getElement1();
       this.costDay1 = statsDay1.getElement2();
-      Logging.log("[-] Statistics from day 1: " + Printer.getNiceStatsTable(endOfDayMessage.getStatistics()));
+      Logging.log("[-] Statistics from day 1: " + Printer.getNiceStatsTable(1, endOfDayMessage.getStatistics()));
       Logging.log("[-] Profit from day 1: " + endOfDayMessage.getCumulativeProfit());
       Logging.log("[-] End of Day 2, bid.");
       TwoDaysBidBundle bidBundleDay2 = this.getBidBundle(2);
@@ -76,7 +76,7 @@ abstract public class TwoDaysOneCampaignAgent extends Agent {
       }
     } else {
       // End of Game.
-      Logging.log("[-] Statistics from day 2: " + Printer.getNiceStatsTable(endOfDayMessage.getStatistics()));
+      Logging.log("[-] Statistics from day 2: " + Printer.getNiceStatsTable(2, endOfDayMessage.getStatistics()));
       Logging.log("[-] Final Profit: " + endOfDayMessage.getCumulativeProfit());
       Logging.log("[-] Final Quality Score: " + endOfDayMessage.getQualityScore());
     }

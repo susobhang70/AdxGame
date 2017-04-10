@@ -59,10 +59,11 @@ public class StatisticsAds {
   }
 
   /**
+   * Given the agent and a campaign ID, returns a pair (TotalWinCount, TotalCost) for the agent's campaign.
    * 
    * @param agent
    * @param campaignId
-   * @return
+   * @return a pair (TotalWinCount, TotalCost) for the agent's campaign.
    */
   public Pair<Integer, Double> getSummaryStatistic(String agent, int campaignId) {
     if (this.summary.containsKey(agent) && this.summary.get(agent).containsKey(campaignId)) {
