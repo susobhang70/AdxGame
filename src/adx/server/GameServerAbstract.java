@@ -105,6 +105,7 @@ abstract public class GameServerAbstract {
     agentsInfo.put("dualityagent", "123456");
     
     // Mondays
+    agentsInfo.put("Agent Zero", "123456");
     agentsInfo.put("Raj's_Bot", "123456");
     agentsInfo.put("tjc", "123456");
     agentsInfo.put("Luke Camery", "123456");

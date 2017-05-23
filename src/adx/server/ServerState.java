@@ -104,7 +104,8 @@ public class ServerState {
   /**
    * Initialize the statistics object.
    * 
-   * @throws AdXException in case the statistics object is initialize more than once.
+   * @throws AdXException
+   *           in case the statistics object is initialize more than once.
    */
   public void initStatistics() throws AdXException {
     if (this.agentsNames != null || this.agentsNames.size() == 0) {
@@ -277,6 +278,9 @@ public class ServerState {
    * @throws AdXException
    */
   public void validateBidBundle(int day, BidBundle bidBundle, String agent) throws AdXException {
+    if (bidBundle == null) {
+      throw new AdXException("Received a null bidBundle");
+    }
     if (day != this.currentDay + 1) {
       throw new AdXException("Received Bid bundle for day " + day + " for agent " + agent + ", but currently accepting for day " + (this.currentDay + 1)
           + ". Bid Bundle not accepted.");

@@ -28,6 +28,6 @@ public class Parameters {
 
   public static final int TOTAL_SIMULATED_DAYS = 2;
 
-  public static final int TOTAL_SIMULATED_GAMES = 50;
+  public static final int TOTAL_SIMULATED_GAMES = 30;
 
 }

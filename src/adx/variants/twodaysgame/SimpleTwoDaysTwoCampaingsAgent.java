@@ -37,7 +37,8 @@ public class SimpleTwoDaysTwoCampaingsAgent extends TwoDaysTwoCampaignsAgent {
       Set<SimpleBidEntry> bidEntries = new HashSet<SimpleBidEntry>();
       bidEntries.add(new SimpleBidEntry(c.getMarketSegment(), c.getBudget() / (double) c.getReach(), c.getBudget()));
       Logging.log("[-] bidEntries = " + bidEntries);
-      return new TwoDaysBidBundle(day, c.getId(), c.getBudget(), bidEntries);
+      //return new TwoDaysBidBundle(day, c.getId(), c.getBudget(), bidEntries);
+      return new TwoDaysBidBundle(day, c.getId(), 40.256, bidEntries);
     } catch (AdXException e) {
       Logging.log("[x] Something went wrong getting the bid bundle: " + e.getMessage());
     }
