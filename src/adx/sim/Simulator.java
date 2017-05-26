@@ -10,6 +10,7 @@ import adx.sim.agents.SimpleSimAgent;
 import adx.sim.agents.WEAgent;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
+import adx.util.Logging;
 import adx.util.Pair;
 import adx.util.Sampling;
 
@@ -83,6 +84,7 @@ public class Simulator {
     this.serverState.updateDailyStatistics();
     // Report results
     this.serverState.printServerState();
+    Logging.log(this.serverState.getStatistics().getStatisticsAds().printNiceAdStatisticsTable());
   }
 
   public static void main(String[] args) throws AdXException {

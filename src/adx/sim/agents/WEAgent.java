@@ -44,6 +44,11 @@ public class WEAgent extends SimAgent {
   private static ImmutableList<GameGoods> listOfGameGoods;
 
   /**
+   * Additive factor for the bids.
+   */
+  private static final double epsilon = 0.1;
+
+  /**
    * Static structures.
    */
   static {
@@ -105,7 +110,7 @@ public class WEAgent extends SimAgent {
 
       // Run pricing algorithm
       RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation);
-      //restrictedEnvyFreePricesLP.setMarketClearanceConditions(true);
+      // restrictedEnvyFreePricesLP.setMarketClearanceConditions(true);
       restrictedEnvyFreePricesLP.createLP();
       RestrictedEnvyFreePricesLPSolution<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> prices = restrictedEnvyFreePricesLP.Solve();
       prices.printPrices();
@@ -115,12 +120,12 @@ public class WEAgent extends SimAgent {
       for (GameGoods demandedGood : myDemandSet) {
         Logging.log("Price for: " + demandedGood + " is " + prices.getPrice(demandedGood));
         if (greedyAllocation.getAllocation(demandedGood, myCampaignBidder) > 0) {
-          bidEntries.add(new SimpleBidEntry(demandedGood.getMarketSegment(), prices.getPrice(demandedGood), greedyAllocation.getAllocation(demandedGood, myCampaignBidder) * prices.getPrice(demandedGood)));
+          bidEntries.add(new SimpleBidEntry(demandedGood.getMarketSegment(), prices.getPrice(demandedGood) + WEAgent.epsilon, greedyAllocation.getAllocation(demandedGood, myCampaignBidder) * (prices.getPrice(demandedGood) + WEAgent.epsilon)));
         }
       }
       // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
       OneDayBidBundle WEBidBundle = new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
-      Logging.log(WEBidBundle);
+      Logging.log("\n:::::::WEBidBundle = " + WEBidBundle);
       return WEBidBundle;
 
     } catch (AdXException | MarketCreationException | BidderCreationException | MarketAllocationException | AllocationException | GoodsException

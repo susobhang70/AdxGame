@@ -22,8 +22,8 @@ public class BidBundleTest {
   public static BidBundle getBidBundle0() throws AdXException {
     return new BidBundle(1, new HashSet<BidEntry>() {
       {
-        add(new BidEntry(1, new Query(MarketSegment.FEMALE), 12.0, 120.0));
-        add(new BidEntry(1, new Query(MarketSegment.MALE), 21.0, 210.0));
+        add(new BidEntry(1, new Query(MarketSegment.FEMALE), 24.0, 12000.0));
+        add(new BidEntry(1, new Query(MarketSegment.MALE), 21.0, 21000.0));
       }
     }, new HashMap<Integer, Double>() {
       {
@@ -42,11 +42,11 @@ public class BidBundleTest {
   public static BidBundle getBidBundle1() throws AdXException {
     return new BidBundle(1, new HashSet<BidEntry>() {
       {
-        add(new BidEntry(2, new Query(MarketSegment.FEMALE_HIGH_INCOME), 600, 1220.0));
+        add(new BidEntry(2, new Query(MarketSegment.HIGH_INCOME), 600, 38000.0));
       }
     }, new HashMap<Integer, Double>() {
       {
-        put(2, 300.0);
+        put(2, 3000.0);
       }
     }, new HashMap<Integer, Double>() {
       {
@@ -60,7 +60,7 @@ public class BidBundleTest {
   public static BidBundle getBidBundle2() throws AdXException {
     return new BidBundle(1, new HashSet<BidEntry>() {
       {
-        add(new BidEntry(3, new Query(MarketSegment.YOUNG), 600, 31220.0));
+        add(new BidEntry(3, new Query(MarketSegment.YOUNG), 600, 31200.0));
       }
     }, new HashMap<Integer, Double>() {
       {
@@ -76,6 +76,16 @@ public class BidBundleTest {
         add(new BidEntry(4, new Query(MarketSegment.YOUNG), 600, 31220.0));
         add(new BidEntry(4, new Query(MarketSegment.MALE_YOUNG), 312.2, 31220.0));
         add(new BidEntry(4, new Query(MarketSegment.FEMALE_LOW_INCOME), 312.2, 31220.0));
+      }
+    }, null, null);
+  }
+  
+  @SuppressWarnings("serial")
+  public static BidBundle getBidBundle4() throws AdXException {
+    return new BidBundle(1, new HashSet<BidEntry>() {
+      {
+        add(new BidEntry(99, new Query(MarketSegment.MALE_YOUNG_HIGH_INCOME), 600, 31220.0));
+        add(new BidEntry(99, new Query(MarketSegment.MALE_YOUNG_HIGH_INCOME), 600, 31220.0));
       }
     }, null, null);
   }

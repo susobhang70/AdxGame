@@ -41,7 +41,9 @@ public class Sampling {
    * Different campaign reach factors.
    */
   private static final double[] campaignReachFactor = { 0.2, 0.4, 0.6 };
-  //private static final double[] campaignReachFactor = { 1.5 };
+  // private static final double[] campaignReachFactor = { 1.5 };
+  
+  private static final Random random = new Random();
 
   /**
    * A unique identifier for campaigns ids.
@@ -74,23 +76,24 @@ public class Sampling {
   }
 
   /**
-   * Given a size of a population n, produces a random population of n users according to the parameters of the game.
+   * Given a size of a population n, produces a random population of n users according to the parameters of the game, and outputs a map Query -> Integer
+   * denoting the number of users for the given query.
    * 
    * @param n
    * @throws AdXException
    */
   // TODO: this method could be optimized. Since the cumulative distribution
   // is fixed, create an array (or map) of size 10000 that maps directly to the market segment.
-  public static final HashMap<Query, Integer> samplePopulation(int n) throws AdXException {
+  public static final HashMap<Query, Integer> sampleAndBucketPopulation(int n) throws AdXException {
     // Construct the sample. Initially there are zero users in each market segment.
     HashMap<Query, Integer> population = new HashMap<Query, Integer>();
     for (MarketSegment m : Sampling.segmentsToSample.keySet()) {
       population.put(new Query(m), 0);
     }
-    Random random = new Random();
+    
     // Sample one user at a time.
     for (int i = 0; i < n; i++) {
-      int r = random.nextInt(Sampling.totalProportion) + 1;
+      int r = Sampling.random.nextInt(Sampling.totalProportion) + 1;
       for (Entry<MarketSegment, Integer> x : Sampling.cumulativeMarketSegments) {
         if (r <= x.getValue()) {
           Query query = new Query(x.getKey());
@@ -100,6 +103,27 @@ public class Sampling {
       }
     }
     return population;
+  }
+
+  /**
+   * Given a size of a population n, produces a list of n random users according to the parameters of the game.
+   * 
+   * @param n
+   * @return
+   * @throws AdXException 
+   */
+  public static final List<Query> samplePopulation(int n) throws AdXException {
+    List<Query> samplePopulation = new ArrayList<Query>();
+    for (int i = 0; i < n; i++) {
+      int r = Sampling.random.nextInt(Sampling.totalProportion) + 1;
+      for (Entry<MarketSegment, Integer> x : Sampling.cumulativeMarketSegments) {
+        if (r <= x.getValue()) {
+          samplePopulation.add(new Query(x.getKey()));
+          break;
+        }
+      }
+    }
+    return samplePopulation;
   }
 
   /**

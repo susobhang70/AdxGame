@@ -21,6 +21,7 @@ public class StatisticsTest {
     agents.add("agent1");
     agents.add("agent2");
     agents.add("agent3");
+    agents.add("agent4");
     return new Statistics(agents);
   }
 
