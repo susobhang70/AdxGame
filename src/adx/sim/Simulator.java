@@ -7,9 +7,9 @@ import adx.exceptions.AdXException;
 import adx.server.ServerState;
 import adx.sim.agents.SimAgent;
 import adx.sim.agents.WE.WEAgent;
+import adx.statistics.Statistics;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
-import adx.util.Logging;
 import adx.util.Pair;
 import adx.util.Sampling;
 
@@ -46,10 +46,11 @@ public class Simulator {
 
   /**
    * Run the simulation.
+   * @return 
    * 
    * @throws AdXException
    */
-  public void run() throws AdXException {
+  public Statistics run() throws AdXException {
 
     this.serverState.initStatistics();
 
@@ -82,8 +83,9 @@ public class Simulator {
     this.serverState.runAdAuctions();
     this.serverState.updateDailyStatistics();
     // Report results
-    this.serverState.printServerState();
-    Logging.log(this.serverState.getStatistics().getStatisticsAds().printNiceAdStatisticsTable());
+    //this.serverState.printServerState();
+    //Logging.log(this.serverState.getStatistics().getStatisticsAds().printNiceAdStatisticsTable());
+    return this.serverState.getStatistics();
   }
 
   public static void main(String[] args) throws AdXException {

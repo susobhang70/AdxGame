@@ -13,7 +13,6 @@ import adx.structures.BidBundle;
 import adx.structures.BidEntry;
 import adx.structures.MarketSegment;
 import adx.structures.Query;
-import adx.util.Logging;
 import adx.util.Pair;
 import adx.util.Parameters;
 import adx.util.Sampling;
@@ -145,6 +144,6 @@ public class AdAuctions {
         }
       }
     }
-    Logging.log(adStatistics.getStatisticsAds().printNiceAdStatisticsTable());
+    //Logging.log(adStatistics.getStatisticsAds().printNiceAdStatisticsTable());
   }
 }
