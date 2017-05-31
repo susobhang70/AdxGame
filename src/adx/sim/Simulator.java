@@ -6,8 +6,7 @@ import java.util.List;
 import adx.exceptions.AdXException;
 import adx.server.ServerState;
 import adx.sim.agents.SimAgent;
-import adx.sim.agents.SimpleSimAgent;
-import adx.sim.agents.WEAgent;
+import adx.sim.agents.WE.WEAgent;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
 import adx.util.Logging;
@@ -90,9 +89,11 @@ public class Simulator {
   public static void main(String[] args) throws AdXException {
     List<SimAgent> simAgents = new ArrayList<SimAgent>();
     for (int i = 0; i < 5; i++) {
-      simAgents.add(new SimpleSimAgent("OneDayAgent" + i));
+      // simAgents.add(new SimpleSimAgent("OneDayAgent" + i));
+      simAgents.add(new WEAgent("WEAgent" + i));
+      //simAgents.add(new WFAgent("WFAgent" + i));
     }
-    simAgents.add(new WEAgent("WEAgent"));
+
     Simulator simulator = new Simulator(simAgents);
     simulator.run();
   }

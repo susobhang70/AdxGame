@@ -35,6 +35,21 @@ public class OneDayBidBundle extends BidBundle {
    */
   public OneDayBidBundle(int campaignId, double limit, Set<SimpleBidEntry> simpleBidEntries) throws AdXException {
     super(1, BidBundleHelper.createBidEntries(campaignId, simpleBidEntries), BidBundleHelper.createLimits(campaignId, limit), null);
+    this.bidEntries = simpleBidEntries;
   }
 
+  @Override
+  public String toString() {
+    String ret = "\n\t OneDayBidBundle:";
+    if (this.bidEntries != null && this.bidEntries.size() > 0) {
+      for (SimpleBidEntry simpleBidEntry : this.bidEntries) {
+        if (simpleBidEntry != null) {
+          ret += "\n\t\t" + simpleBidEntry;
+        }
+      }
+    } else {
+      ret += " [EMPTY] ";
+    }
+    return ret;
+  }
 }

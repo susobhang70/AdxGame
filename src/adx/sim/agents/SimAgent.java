@@ -2,8 +2,12 @@ package adx.sim.agents;
 
 import java.util.List;
 
+import structures.Bidder;
+import structures.Market;
+import adx.sim.agents.WE.GameGoods;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
+import adx.util.Logging;
 
 /**
  * Abstract class to be extended by a simulated agent.
@@ -53,9 +57,9 @@ public abstract class SimAgent {
   public void setCampaigns(Campaign campaign, List<Campaign> othersCampaigns) {
     this.myCampaign = campaign;
     this.othersCampaigns = othersCampaigns;
-    //Logging.log(this.simAgentName);
-    //Logging.log(this.myCampaign);
-    //Logging.log(this.othersCampaigns);
+    // Logging.log(this.simAgentName);
+    // Logging.log(this.myCampaign);
+    // Logging.log(this.othersCampaigns);
   }
 
   /**
@@ -64,5 +68,22 @@ public abstract class SimAgent {
    * @return a BidBundle
    */
   public abstract BidBundle getBidBundle();
+
+  /**
+   * Helper method to print information, mainly about the model.
+   */
+  protected void printInfo(String name, Market<GameGoods, Bidder<GameGoods>> market) {
+    Logging.log("***********" + name + "************");
+    Logging.log("My Campaign: \n\t " + this.myCampaign);
+    Logging.log("Others Campaigns: ");
+    for (Campaign c : this.othersCampaigns) {
+      Logging.log("\t " + c);
+    }
+    Logging.log("List of Goods = ");
+    for (GameGoods gameGood : SimAgentModel.listOfGameGoods) {
+      Logging.log("\t " + gameGood);
+    }
+    Logging.log("\n ------ Model: \n" + market + "\n ---------");
+  }
 
 }
