@@ -11,6 +11,7 @@ import java.util.Set;
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
 import adx.util.InputValidators;
+import adx.util.Logging;
 import adx.util.Pair;
 import adx.util.Parameters;
 import adx.util.Printer;
@@ -188,11 +189,14 @@ public class Statistics {
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
   private double computeEffectiveReachRatio(double x, int reach) {
-    // Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
+    Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
     // NOTE: the following is a sigmoid effective reach ratio.
     // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
     // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
-    return Math.min(x / (double) reach, 1.0);
+    //return Math.min(x / (double) reach, 1.0);
+    // NOTE: this is and all-or-nothing effective reach
+    Logging.log("All-or-nothing: " + ((x >= reach) ? 1.0 : 0.0));
+    return (x >= reach) ? 1.0 : 0.0;
   }
 
   /**
