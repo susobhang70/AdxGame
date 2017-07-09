@@ -85,7 +85,7 @@ public class AdAuctions {
   }
 
   /**
-   * Runs all the auctions for a given day.
+   * Wrapper to run all auctions with no reserve.
    * 
    * @param day
    * @param bidBundles
@@ -93,13 +93,24 @@ public class AdAuctions {
    * @throws AdXException
    */
   public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, Statistics adStatistics) throws AdXException {
+    AdAuctions.runAllAuctions(day, bidBundles, adStatistics, 0.0);
+  }
+  /**
+   * Runs all the auctions for a given day.
+   * 
+   * @param day
+   * @param bidBundles
+   * @param adStatistics
+   * @throws AdXException
+   */
+  public static void runAllAuctions(int day, Map<String, BidBundle> bidBundles, Statistics adStatistics, double reserve) throws AdXException {
     // Get the daily limits
     Map<Integer, Double> dailyLimits = AdAuctions.getCampaingsDailyLimit(day, bidBundles);
     // Collect bids.
     Map<Query, StandingBids> allQueriesStandingBids = new HashMap<Query, StandingBids>();
     for (MarketSegment marketSegment : Sampling.segmentsToSample.keySet()) {
       Query query = new Query(marketSegment);
-      allQueriesStandingBids.put(query, new StandingBids(AdAuctions.filterBids(query, bidBundles)));
+      allQueriesStandingBids.put(query, new StandingBids(AdAuctions.filterBids(query, bidBundles), reserve));
     }
     // Sample user population.
     List<Query> samplePopulation = Sampling.samplePopulation(Parameters.POPULATION_SIZE);

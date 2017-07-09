@@ -22,7 +22,7 @@ public class OneDayExperiments {
     DescriptiveStatistics stats = new DescriptiveStatistics();
     for (int i = 0; i < 8; i++) {
       // Walrasian Agents
-      simAgents.add(new WEAgent("WEAgent" + i));
+      simAgents.add(new WEAgent("WEAgent" + i, 0.0));
       // stats.put("WEAgent" + i, new DescriptiveStatistics());
 
       // Waterfall Agents

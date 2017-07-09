@@ -1,10 +1,21 @@
 package adx.sim.agents.WE;
 
-import ilog.concert.IloException;
-
 import java.util.HashSet;
 import java.util.Set;
 
+import adx.exceptions.AdXException;
+import adx.sim.agents.SimAgent;
+import adx.sim.agents.SimAgentModel;
+import adx.sim.agents.SimAgentModel.MarketModel;
+import adx.structures.BidBundle;
+import adx.structures.SimpleBidEntry;
+import adx.util.Logging;
+import adx.variants.onedaygame.OneDayBidBundle;
+import algorithms.pricing.RestrictedEnvyFreePricesLPSolution;
+import algorithms.pricing.RestrictedEnvyFreePricesLPWithReserve;
+import algorithms.pricing.error.PrincingAlgoException;
+import allocations.greedy.GreedyAllocation;
+import ilog.concert.IloException;
 import structures.Bidder;
 import structures.Market;
 import structures.MarketAllocation;
@@ -14,18 +25,6 @@ import structures.exceptions.GoodsException;
 import structures.exceptions.MarketAllocationException;
 import structures.exceptions.MarketCreationException;
 import structures.exceptions.MarketOutcomeException;
-import adx.exceptions.AdXException;
-import adx.sim.agents.SimAgent;
-import adx.sim.agents.SimAgentModel;
-import adx.sim.agents.SimAgentModel.MarketModel;
-import adx.structures.BidBundle;
-import adx.structures.SimpleBidEntry;
-import adx.util.Logging;
-import adx.variants.onedaygame.OneDayBidBundle;
-import algorithms.pricing.RestrictedEnvyFreePricesLP;
-import algorithms.pricing.RestrictedEnvyFreePricesLPSolution;
-import algorithms.pricing.error.PrincingAlgoException;
-import allocations.greedy.GreedyAllocation;
 
 /**
  * Implements the Walrasian Equilibrium (WE) agent.
@@ -38,14 +37,20 @@ public class WEAgent extends SimAgent {
    * Additive factor for the bids.
    */
   private static final double epsilon = 0.001;
+  
+  /**
+   * The reserve price.
+   */
+  private final double reserve;
 
   /**
    * Constructor.
    * 
    * @param simAgentName
    */
-  public WEAgent(String simAgentName) {
+  public WEAgent(String simAgentName, double reserve) {
     super(simAgentName);
+    this.reserve = reserve;
   }
 
   @Override
@@ -65,7 +70,7 @@ public class WEAgent extends SimAgent {
       //greedyAllocation.printAllocation();
 
       // Run pricing algorithm
-      RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation);
+      RestrictedEnvyFreePricesLPWithReserve<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLPWithReserve<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation, this.reserve);
       // restrictedEnvyFreePricesLP.setMarketClearanceConditions(true);
       restrictedEnvyFreePricesLP.createLP();
       RestrictedEnvyFreePricesLPSolution<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> prices = restrictedEnvyFreePricesLP.Solve();

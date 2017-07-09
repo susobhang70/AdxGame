@@ -6,7 +6,6 @@ import java.util.List;
 import adx.exceptions.AdXException;
 import adx.server.ServerState;
 import adx.sim.agents.SimAgent;
-import adx.sim.agents.WE.WEAgent;
 import adx.statistics.Statistics;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
@@ -29,6 +28,11 @@ public class Simulator {
    * Keep a server state
    */
   private final ServerState serverState;
+  
+  /**
+   * Reserve price
+   */
+  private final double reserve;
 
   /**
    * Constructor.
@@ -36,12 +40,23 @@ public class Simulator {
    * @param agents
    * @throws AdXException
    */
-  public Simulator(List<SimAgent> agents) throws AdXException {
+  public Simulator(List<SimAgent> agents, double reserve) throws AdXException {
     this.agents = agents;
     this.serverState = new ServerState(0);
     for (SimAgent simAgent : agents) {
       this.serverState.registerAgent(simAgent.getName());
     }
+    this.reserve = reserve;
+  }
+  
+  /**
+   * Constructor. 
+   * 
+   * @param agents
+   * @throws AdXException
+   */
+  public Simulator(List<SimAgent> agents) throws AdXException {
+    this(agents, 0.0);
   }
 
   /**
@@ -80,24 +95,12 @@ public class Simulator {
     }
     this.serverState.advanceDay();
     // Run auctions
-    this.serverState.runAdAuctions();
+    this.serverState.runAdAuctions(this.reserve);
     this.serverState.updateDailyStatistics();
     // Report results
     //this.serverState.printServerState();
     //Logging.log(this.serverState.getStatistics().getStatisticsAds().printNiceAdStatisticsTable());
     return this.serverState.getStatistics();
-  }
-
-  public static void main(String[] args) throws AdXException {
-    List<SimAgent> simAgents = new ArrayList<SimAgent>();
-    for (int i = 0; i < 5; i++) {
-      // simAgents.add(new SimpleSimAgent("OneDayAgent" + i));
-      simAgents.add(new WEAgent("WEAgent" + i));
-      //simAgents.add(new WFAgent("WFAgent" + i));
-    }
-
-    Simulator simulator = new Simulator(simAgents);
-    simulator.run();
   }
 
 }

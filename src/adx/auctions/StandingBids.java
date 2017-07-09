@@ -10,7 +10,8 @@ import adx.structures.BidEntry;
 import adx.util.Pair;
 
 /**
- * This class contains the data and logic associated with bids from the same query.
+ * This class contains the data and logic associated with bids from the same
+ * query.
  * 
  * @author Enrique Areyan Viqueira
  */
@@ -20,39 +21,50 @@ public class StandingBids {
    * List of pair (agent name, bid).
    */
   private List<Pair<String, BidEntry>> standingBids;
+  
+  /**
+   * Reserve price
+   */
+  private final double reserve;
 
   /**
    * Constructor. Sorts bids in decreasing order.
    * 
    * @param bids
    */
-  public StandingBids(List<Pair<String, BidEntry>> bids) {
+  public StandingBids(List<Pair<String, BidEntry>> bids, double reserve) {
     this.standingBids = new ArrayList<Pair<String, BidEntry>>(bids);
     Collections.sort(this.standingBids, AdAuctions.bidComparator);
+    this.reserve = reserve;
   }
 
   /**
-   * Returns the cost that needs to be paid by the winner, a.k.a. the second price.
+   * Returns the cost that needs to be paid by the winner, a.k.a. the second
+   * price (more specifically, the max between the reserve and the second price).
    * 
    * @return
    */
   protected double getWinnerCost() {
     if (this.standingBids.size() <= 1) {
-      return 0.0;
+      return this.reserve;
     } else {
-      return standingBids.get(1).getElement2().getBid();
+      return Math.max(standingBids.get(1).getElement2().getBid(), this.reserve);
     }
   }
 
   /**
    * Returns a winner (chosen at random if there are ties).
    * 
+   * @param reserve
    * @return
    * @throws AdXException
    */
   protected Pair<String, BidEntry> getWinner() throws AdXException {
     if (this.standingBids.size() == 0) {
       // If there are no more bids, return null.
+      return null;
+    } else if (this.standingBids.get(0).getElement2().getBid() < reserve) {
+      // If the highest bid does not meet reserve, return null.
       return null;
     } else if (this.standingBids.size() == 1) {
       // If there is only one bid, return it.
@@ -64,7 +76,8 @@ public class StandingBids {
       Iterator<Pair<String, BidEntry>> bidsListIterator = this.standingBids.iterator();
       Pair<String, BidEntry> currentBidder = null;
       // Keep adding bidders to the winnerList as long as their bids match the winning bid.
-      while ((bidsListIterator.hasNext()) && ((currentBidder = bidsListIterator.next()) != null) && currentBidder.getElement2().getBid() == winningBid) {
+      while ((bidsListIterator.hasNext()) && ((currentBidder = bidsListIterator.next()) != null)
+          && currentBidder.getElement2().getBid() == winningBid) {
         winnerList.add(currentBidder);
       }
       // At this point we should have at least one bidder or something went wrong.
@@ -87,9 +100,11 @@ public class StandingBids {
   }
 
   /**
-   * Removes all the bids that belong to the campaign whose campaign id is given as a parameter. This methods creates a new list containing the bidEntries for
-   * campaigns other than campaignId and assigns this list as the standingBids. This is done to avoid concurrent exception that may arise by deleting members of
-   * the standingBids list directly
+   * Removes all the bids that belong to the campaign whose campaign id is given
+   * as a parameter. This methods creates a new list containing the bidEntries
+   * for campaigns other than campaignId and assigns this list as the
+   * standingBids. This is done to avoid concurrent exception that may arise by
+   * deleting members of the standingBids list directly
    * 
    * @param campaignId
    */

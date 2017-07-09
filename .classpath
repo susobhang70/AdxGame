@@ -2,8 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/gpfs/main/home/eareyanv/workspace/lib/kryonet-2.21-all.jar"/>
-	<classpathentry kind="lib" path="/gpfs/main/home/eareyanv/workspace/lib/guava-19.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="/Users/enriqueareyan/Documents/workspace/lib/guava-19.0.jar"/>
+	<classpathentry kind="lib" path="/Users/enriqueareyan/Documents/workspace/lib/kryonet-2.21-all.jar"/>
+	<classpathentry kind="lib" path="/Users/enriqueareyan/Documents/workspace/lib/envy-free-prices.jar"/>
+	<classpathentry kind="lib" path="/Users/enriqueareyan/Documents/workspace/lib/commons-math3-3.0.jar"/>
+	<classpathentry kind="lib" path="/Users/enriqueareyan/Documents/workspace/envy-free-prices/lib/cplex.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

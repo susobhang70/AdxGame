@@ -189,13 +189,13 @@ public class Statistics {
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
   private double computeEffectiveReachRatio(double x, int reach) {
-    Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
+    //Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
     // NOTE: the following is a sigmoid effective reach ratio.
     // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
     // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
     //return Math.min(x / (double) reach, 1.0);
     // NOTE: this is and all-or-nothing effective reach
-    Logging.log("All-or-nothing: " + ((x >= reach) ? 1.0 : 0.0));
+    //Logging.log("All-or-nothing: " + ((x >= reach) ? 1.0 : 0.0));
     return (x >= reach) ? 1.0 : 0.0;
   }
 
@@ -222,7 +222,7 @@ public class Statistics {
   /**
    * Printer.
    * 
-   * @return a human readable representation of the quality scores.
+   * @return a human readable representation of the profits.
    */
   public String getNiceProfitScoresTable() {
     String ret = "";

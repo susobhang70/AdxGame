@@ -218,7 +218,7 @@ public class ServerState {
    */
   public void advanceDay() {
     this.currentDay++;
-    Logging.log("[*] Day " + this.currentDay + " ended at " + Instant.now());
+    //Logging.log("[*] Day " + this.currentDay + " ended at " + Instant.now());
   }
 
   /**
@@ -261,7 +261,7 @@ public class ServerState {
   public Pair<Boolean, String> addBidBundle(int day, String agent, BidBundle bidBundle) {
     try {
       this.validateBidBundle(day, bidBundle, agent);
-      Logging.log("[-] Bid bundle on day " + day + " for agent " + agent + ", accepted.");
+      //Logging.log("[-] Bid bundle on day " + day + " for agent " + agent + ", accepted.");
       this.bidBundles.put(day, agent, bidBundle);
     } catch (AdXException e) {
       return new Pair<Boolean, String>(false, e.getMessage());
@@ -329,7 +329,7 @@ public class ServerState {
    * @throws AdXException
    */
   public void runCampaignAuctions() throws AdXException {
-    Logging.log("[-] Try to run campaign auction for day " + this.currentDay);
+    //Logging.log("[-] Try to run campaign auction for day " + this.currentDay);
     List<Campaign> campaignsForAuction = this.campaignsForAuction.get(this.currentDay);
     for (Campaign campaign : campaignsForAuction) {
       // Logging.log("\t\t [-] Campaign = " + campaign);
@@ -355,10 +355,19 @@ public class ServerState {
    * 
    * @throws AdXException
    */
+  public void runAdAuctions(double reserve) throws AdXException {
+    //Logging.log("[-] Try to run ad auctions for day: " + this.currentDay);
+    AdAuctions.runAllAuctions(this.currentDay, this.bidBundles.row(this.currentDay), this.statistics, reserve);
+    //Logging.log("[-] Done running ad auctions for day: " + this.currentDay);
+  }
+  
+  /**
+   * Wrapper to run auctions with no reserve.
+   * 
+   * @throws AdXException
+   */
   public void runAdAuctions() throws AdXException {
-    Logging.log("[-] Try to run ad auctions for day: " + this.currentDay);
-    AdAuctions.runAllAuctions(this.currentDay, this.bidBundles.row(this.currentDay), this.statistics);
-    Logging.log("[-] Done running ad auctions for day: " + this.currentDay);
+    this.runAdAuctions(0.0);
   }
 
   /**
