@@ -11,8 +11,8 @@ import adx.structures.BidBundle;
 import adx.structures.SimpleBidEntry;
 import adx.util.Logging;
 import adx.variants.onedaygame.OneDayBidBundle;
+import algorithms.pricing.RestrictedEnvyFreePricesLP;
 import algorithms.pricing.RestrictedEnvyFreePricesLPSolution;
-import algorithms.pricing.RestrictedEnvyFreePricesLPWithReserve;
 import algorithms.pricing.error.PrincingAlgoException;
 import allocations.greedy.GreedyAllocation;
 import ilog.concert.IloException;
@@ -70,7 +70,7 @@ public class WEAgent extends SimAgent {
       //greedyAllocation.printAllocation();
 
       // Run pricing algorithm
-      RestrictedEnvyFreePricesLPWithReserve<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLPWithReserve<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation, this.reserve);
+      RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation);
       // restrictedEnvyFreePricesLP.setMarketClearanceConditions(true);
       restrictedEnvyFreePricesLP.createLP();
       RestrictedEnvyFreePricesLPSolution<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> prices = restrictedEnvyFreePricesLP.Solve();

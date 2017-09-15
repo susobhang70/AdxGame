@@ -78,7 +78,7 @@ public class Experiments {
       int sampleSize = Integer.parseInt(args[2]);
       String logFile = args[3];
       Logging.log("Run experiment with " + numberOfAgents + " many " + typeOfAgents + " agents, run " + sampleSize + " trials and save results to: " + logFile);
-      for (double r = 0; r <= 1.01; r += 0.1) {
+      for (double r = 0; r <= 4.01; r += 0.01) {
         DescriptiveStatistics s = new DescriptiveStatistics();
         for (int i = 0; i < sampleSize; i++) {
           double revenue = Experiments.runExperiment(typeOfAgents, numberOfAgents, r);
