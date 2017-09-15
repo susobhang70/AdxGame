@@ -1,8 +1,19 @@
 package adx.sim.agents.WE;
 
+import ilog.concert.IloException;
+
 import java.util.HashSet;
 import java.util.Set;
 
+import structures.Bidder;
+import structures.Market;
+import structures.MarketAllocation;
+import structures.exceptions.AllocationException;
+import structures.exceptions.BidderCreationException;
+import structures.exceptions.GoodsException;
+import structures.exceptions.MarketAllocationException;
+import structures.exceptions.MarketCreationException;
+import structures.exceptions.MarketOutcomeException;
 import adx.exceptions.AdXException;
 import adx.sim.agents.SimAgent;
 import adx.sim.agents.SimAgentModel;
@@ -15,16 +26,6 @@ import algorithms.pricing.RestrictedEnvyFreePricesLP;
 import algorithms.pricing.RestrictedEnvyFreePricesLPSolution;
 import algorithms.pricing.error.PrincingAlgoException;
 import allocations.greedy.GreedyAllocation;
-import ilog.concert.IloException;
-import structures.Bidder;
-import structures.Market;
-import structures.MarketAllocation;
-import structures.exceptions.AllocationException;
-import structures.exceptions.BidderCreationException;
-import structures.exceptions.GoodsException;
-import structures.exceptions.MarketAllocationException;
-import structures.exceptions.MarketCreationException;
-import structures.exceptions.MarketOutcomeException;
 
 /**
  * Implements the Walrasian Equilibrium (WE) agent.
@@ -41,7 +42,7 @@ public class WEAgent extends SimAgent {
   /**
    * The reserve price.
    */
-  private final double reserve;
+  //private final double reserve;
 
   /**
    * Constructor.
@@ -50,7 +51,7 @@ public class WEAgent extends SimAgent {
    */
   public WEAgent(String simAgentName, double reserve) {
     super(simAgentName);
-    this.reserve = reserve;
+    //this.reserve = reserve;
   }
 
   @Override

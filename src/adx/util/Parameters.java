@@ -26,7 +26,7 @@ public class Parameters {
   //public static final ImmutableList<Integer> CAMPAIGN_DURATIONS = ImmutableList.of(1);
   public static final ImmutableList<Integer> CAMPAIGN_DURATIONS = ImmutableList.of(1);
 
-  public static final int TOTAL_SIMULATED_DAYS = 2;
+  public static final int TOTAL_SIMULATED_DAYS = 1;
 
   public static final int TOTAL_SIMULATED_GAMES = 30;
 

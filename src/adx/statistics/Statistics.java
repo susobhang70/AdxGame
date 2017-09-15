@@ -11,7 +11,6 @@ import java.util.Set;
 import adx.exceptions.AdXException;
 import adx.structures.Campaign;
 import adx.util.InputValidators;
-import adx.util.Logging;
 import adx.util.Pair;
 import adx.util.Parameters;
 import adx.util.Printer;

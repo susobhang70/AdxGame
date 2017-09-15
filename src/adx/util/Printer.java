@@ -42,9 +42,11 @@ public class Printer {
    */
   public static String getNiceStatsTable(Map<Integer, Pair<Integer, Double>> stats) {
     String ret = "";
-    for (Entry<Integer, Pair<Integer, Double>> x : stats.entrySet()) {
-      ret += "\n\tCampaign " + x.getKey() + ", Total Reach = " + x.getValue().getElement1() + ", Total Cost " + x.getValue().getElement2();
-    }
+    if (stats != null) {
+      for (Entry<Integer, Pair<Integer, Double>> x : stats.entrySet()) {
+        ret += "\n\tCampaign " + x.getKey() + ", Total Reach = " + x.getValue().getElement1() + ", Total Cost " + x.getValue().getElement2();
+      }
+    } 
     return ret;
   }
 
