@@ -15,6 +15,7 @@ import structures.exceptions.MarketAllocationException;
 import structures.exceptions.MarketCreationException;
 import structures.exceptions.MarketOutcomeException;
 import adx.exceptions.AdXException;
+import adx.sim.agents.GameGoods;
 import adx.sim.agents.SimAgent;
 import adx.sim.agents.SimAgentModel;
 import adx.sim.agents.SimAgentModel.MarketModel;
@@ -38,11 +39,11 @@ public class WEAgent extends SimAgent {
    * Additive factor for the bids.
    */
   private static final double epsilon = 0.001;
-  
+
   /**
    * The reserve price.
    */
-  //private final double reserve;
+  // private final double reserve;
 
   /**
    * Constructor.
@@ -51,7 +52,7 @@ public class WEAgent extends SimAgent {
    */
   public WEAgent(String simAgentName, double reserve) {
     super(simAgentName);
-    //this.reserve = reserve;
+    // this.reserve = reserve;
   }
 
   @Override
@@ -62,35 +63,39 @@ public class WEAgent extends SimAgent {
       MarketModel marketModel = SimAgentModel.constructModel(this.myCampaign, this.othersCampaigns);
       Market<GameGoods, Bidder<GameGoods>> market = marketModel.market;
       // Print some useful info
-      //this.printInfo("WE AGENT", market);
+      // this.printInfo("WE AGENT", market);
       Bidder<GameGoods> myCampaignBidder = marketModel.mybidder;
       Set<GameGoods> myDemandSet = marketModel.mybidder.getDemandSet();
 
       // Run allocation algorithm.
-      MarketAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> greedyAllocation = new GreedyAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>().Solve(market);
-      //greedyAllocation.printAllocation();
+      MarketAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> greedyAllocation = new GreedyAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>()
+          .Solve(market);
+      // greedyAllocation.printAllocation();
 
       // Run pricing algorithm
-      RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(greedyAllocation);
+      RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(
+          greedyAllocation);
       // restrictedEnvyFreePricesLP.setMarketClearanceConditions(true);
       restrictedEnvyFreePricesLP.createLP();
       RestrictedEnvyFreePricesLPSolution<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> prices = restrictedEnvyFreePricesLP.Solve();
-      //prices.printPrices();
+      // prices.printPrices();
 
       // Back-up bid from WE allocation and prices
       Set<SimpleBidEntry> bidEntries = new HashSet<SimpleBidEntry>();
       for (GameGoods demandedGood : myDemandSet) {
-        //Logging.log("Price for: " + demandedGood + " is " + prices.getPrice(demandedGood));
+        // Logging.log("Price for: " + demandedGood + " is " + prices.getPrice(demandedGood));
         if (greedyAllocation.getAllocation(demandedGood, myCampaignBidder) > 0) {
-          bidEntries.add(new SimpleBidEntry(demandedGood.getMarketSegment(), prices.getPrice(demandedGood) + WEAgent.epsilon, greedyAllocation.getAllocation(demandedGood, myCampaignBidder) * (prices.getPrice(demandedGood) + WEAgent.epsilon)));
+          bidEntries.add(new SimpleBidEntry(demandedGood.getMarketSegment(), prices.getPrice(demandedGood) + WEAgent.epsilon, greedyAllocation.getAllocation(
+              demandedGood, myCampaignBidder) * (prices.getPrice(demandedGood) + WEAgent.epsilon)));
         }
       }
       // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
       OneDayBidBundle WEBidBundle = new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
-      //Logging.log("\n:::::::WEBidBundle = " + WEBidBundle);
+      // Logging.log("\n:::::::WEBidBundle = " + WEBidBundle);
       return WEBidBundle;
 
-    } catch (AdXException | MarketCreationException | BidderCreationException | MarketAllocationException | AllocationException | GoodsException | PrincingAlgoException | IloException | MarketOutcomeException e) {
+    } catch (AdXException | MarketCreationException | BidderCreationException | MarketAllocationException | AllocationException | GoodsException
+        | PrincingAlgoException | IloException | MarketOutcomeException e) {
       Logging.log("Failed to create market model --> ");
       e.printStackTrace();
     }

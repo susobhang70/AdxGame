@@ -1,4 +1,4 @@
-package adx.sim.agents.WE;
+package adx.sim.agents;
 
 import structures.Goods;
 import structures.exceptions.GoodsCreationException;
