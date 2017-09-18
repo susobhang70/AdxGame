@@ -32,12 +32,16 @@ public class OneDayExperiments {
     // Mix of 2 type of agents experiments (except SI v SI which is not interesting).
     for (int j = 1; j < 11; j++) {
       for (int l = 1; l < 11; l++) {
-        ExperimentFactory.SIandWEAgents(j, l);
-        ExperimentFactory.SIandWFAgents(j, l);
+        Logging.log("SI and WE agents (" + j + "," + l + ")");
+        ExperimentFactory.SIandWEAgents(j, l).runExperiment();
+        Logging.log("SI and WF agents (" + j + "," + l + ")");
+        ExperimentFactory.SIandWFAgents(j, l).runExperiment();
+        Logging.log("WE and WF agents (" + j + "," + l + ")");
         ExperimentFactory.WEandWFAgents(j, l).runExperiment();
         // All 3 types of agents playing.
         for (int k = 1; k < 11; k++) {
-          ExperimentFactory.SIandWEandWFAgents(j, l, k);
+          Logging.log("SI and WE and WF agents ("+ j + "," + l + "," + k +")");
+          ExperimentFactory.SIandWEandWFAgents(j, l, k).runExperiment();
         }
       }
     }
