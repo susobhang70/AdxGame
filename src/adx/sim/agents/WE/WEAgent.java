@@ -63,14 +63,14 @@ public class WEAgent extends SimAgent {
       MarketModel marketModel = SimAgentModel.constructModel(this.myCampaign, this.othersCampaigns);
       Market<GameGoods, Bidder<GameGoods>> market = marketModel.market;
       // Print some useful info
-      // this.printInfo("WE AGENT", market);
+      //this.printInfo("WE AGENT", market);
       Bidder<GameGoods> myCampaignBidder = marketModel.mybidder;
       Set<GameGoods> myDemandSet = marketModel.mybidder.getDemandSet();
 
       // Run allocation algorithm.
       MarketAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> greedyAllocation = new GreedyAllocation<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>()
           .Solve(market);
-      // greedyAllocation.printAllocation();
+      //greedyAllocation.printAllocation();
 
       // Run pricing algorithm
       RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>> restrictedEnvyFreePricesLP = new RestrictedEnvyFreePricesLP<Market<GameGoods, Bidder<GameGoods>>, GameGoods, Bidder<GameGoods>>(
@@ -91,7 +91,7 @@ public class WEAgent extends SimAgent {
       }
       // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
       OneDayBidBundle WEBidBundle = new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
-      // Logging.log("\n:::::::WEBidBundle = " + WEBidBundle);
+      //Logging.log("\n:::::::WEBidBundle for campaign: " + this.myCampaign + " = " + WEBidBundle);
       return WEBidBundle;
 
     } catch (AdXException | MarketCreationException | BidderCreationException | MarketAllocationException | AllocationException | GoodsException

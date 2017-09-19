@@ -44,6 +44,7 @@ public class Experiment {
       // Get statistics.
       Statistics statistics = simulator.run();
       ret += statistics.oneLineSummary(1, g);
+      //Logging.log("Result : \n" + statistics.oneLineSummary(1, g));
     }
     //Logging.log(ret);
     PrintWriter writer = new PrintWriter(this.csvFileName, "UTF-8");
