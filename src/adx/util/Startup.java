@@ -15,6 +15,7 @@ import adx.structures.Query;
 import adx.structures.SimpleBidEntry;
 import adx.variants.onedaygame.OneDayBidBundle;
 import adx.variants.twodaysgame.TwoDaysBidBundle;
+import adx.variants.thirtydaysgame.ThirtyDaysBidBundle;
 
 import com.esotericsoftware.kryo.Kryo;
 
@@ -39,6 +40,7 @@ public class Startup {
     kryo.register(ArrayList.class);
     kryo.register(OneDayBidBundle.class);
     kryo.register(TwoDaysBidBundle.class);
+    kryo.register(ThirtyDaysBidBundle.class);
     kryo.register(SimpleBidEntry.class);
   }
 }
