@@ -102,7 +102,7 @@ public class Statistics {
   /**
    * Getter.
    * 
-   * @return the map of quality scores.
+   * @return the profit made on the given day by the given agent.
    * @throws AdXException
    */
   public Double getProfit(int day, String agent) throws AdXException {
@@ -167,12 +167,13 @@ public class Statistics {
         int totalReachSoFar = this.adsStatisticsHandler.getSummaryStatistic(agent, c.getId()).getElement1();
         int todayEffectiveReach = this.adsStatisticsHandler.getDailyEffectiveReach(day, agent, c.getId());
         double todayCost = this.adsStatisticsHandler.getDailySummaryStatistic(day, agent, c.getId()).getElement2();
-        //TODO: the profit and quality score should be a function of the effective reach only!
-        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) 
-                        - this.computeEffectiveReachRatio(totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
+        // TODO: the profit and quality score should be a function of the effective reach only!
+        todaysProfit += (this.computeEffectiveReachRatio(totalReachSoFar, c.getReach()) - this.computeEffectiveReachRatio(
+            totalReachSoFar - todayEffectiveReach, c.getReach())) * c.getBudget() - todayCost;
         if (c.getEndDay() == day) {
           // The campaign ended today, update the quality score.
-          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
+          qualityScore = (1 - Parameters.QUALITY_SCORE_LEARNING_RATE) * qualityScore + Parameters.QUALITY_SCORE_LEARNING_RATE
+              * this.computeEffectiveReachRatio(totalReachSoFar, c.getReach());
         }
       }
     }
@@ -188,13 +189,13 @@ public class Statistics {
    * @return the effective reach ratio for obtaining x impressions on a campaign with given reach and budget.
    */
   private double computeEffectiveReachRatio(double x, int reach) {
-    //Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
+    // Logging.log("Compute ERR (x, reach) = (" + x + ", " + reach + ")");
     // NOTE: the following is a sigmoid effective reach ratio.
     // return (2 / 4.08577) * (Math.atan(4.08577 * (x / reach) - 3.08577) - Math.atan(-3.08577));
     // NOTE: this is a linear effective reach ratio with a cap equal to the total reach (no over reach)
-    //return Math.min(x / (double) reach, 1.0);
+    // return Math.min(x / (double) reach, 1.0);
     // NOTE: this is and all-or-nothing effective reach
-    //Logging.log("All-or-nothing: " + ((x >= reach) ? 1.0 : 0.0));
+    // Logging.log("All-or-nothing: " + ((x >= reach) ? 1.0 : 0.0));
     return (x >= reach) ? 1.0 : 0.0;
   }
 
@@ -272,5 +273,23 @@ public class Statistics {
       }
     });
     return finalScores;
+  }
+
+  /**
+   * One Line Summary results of the game in a given .
+   * 
+   * @param day
+   * @throws AdXException
+   */
+  public String oneLineSummary(int day, int game) throws AdXException {
+    String ret = "";
+    for (String agent : this.agentsNames) {
+      for (Campaign c : this.campaignsStatisticsHandler.agentsCampaigns.get(agent)) {
+        Pair<Integer, Double> winCountCost = this.adsStatisticsHandler.getDailySummaryStatistic(day, agent, c.getId());
+        ret += game + "," + agent + "," + c.getMarketSegment() + "," + c.getReach() + "," + c.getBudget() + "," + winCountCost.getElement1() + ","
+            + winCountCost.getElement2() + "\n";
+      }
+    }
+    return ret;
   }
 }

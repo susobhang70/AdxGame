@@ -28,11 +28,24 @@ public class SimpleSimAgent extends SimAgent {
       bidEntries.add(new SimpleBidEntry(this.myCampaign.getMarketSegment(), this.myCampaign.getBudget() / (double) this.myCampaign.getReach(), this.myCampaign.getBudget()));
       // Logging.log("[-] bidEntries = " + bidEntries);
       // The bid bundle indicates the campaign id, the limit across all auctions, and the bid entries.
-      return new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
+      OneDayBidBundle SIBidBundle = new OneDayBidBundle(this.myCampaign.getId(), this.myCampaign.getBudget(), bidEntries);
+      //Logging.log("\n:::::::SIBidBundle for campaign: " + this.myCampaign + " = " + SIBidBundle);
+      //this.getMatchingMarketSegment(this.myCampaign.getMarketSegment());
+      return SIBidBundle;
     } catch (AdXException e) {
       Logging.log("[x] Something went wrong getting the bid bundle: " + e.getMessage());
       return null;
     }
   }
+
+  /*public Set<MarketSegment> getMatchingMarketSegment(MarketSegment m) throws AdXException {
+    for (Entry<MarketSegment, Integer> entry : MarketSegment.proportionsList) {
+      //Logging.log(entry.getKey());
+      if (MarketSegment.marketSegmentSubset(m, entry.getKey())) {
+        //Logging.log("\t yes");
+      }
+    }
+    return null;
+  }*/
 
 }

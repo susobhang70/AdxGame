@@ -4,7 +4,6 @@ import java.util.List;
 
 import structures.Bidder;
 import structures.Market;
-import adx.sim.agents.WE.GameGoods;
 import adx.structures.BidBundle;
 import adx.structures.Campaign;
 import adx.util.Logging;

@@ -11,7 +11,6 @@ import structures.exceptions.BidderCreationException;
 import structures.exceptions.GoodsCreationException;
 import structures.exceptions.MarketCreationException;
 import adx.exceptions.AdXException;
-import adx.sim.agents.WE.GameGoods;
 import adx.structures.Campaign;
 import adx.structures.MarketSegment;
 import adx.util.Logging;

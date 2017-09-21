@@ -136,6 +136,7 @@ public class Sampling {
     // The only difference is that the budget equals 1$ per impression.
     Campaign initialCampaign = Sampling.sampleCampaign(0);
     initialCampaign.setBudget(initialCampaign.getReach());
+    //Logging.log(initialCampaign);
     return initialCampaign;
   }
 
